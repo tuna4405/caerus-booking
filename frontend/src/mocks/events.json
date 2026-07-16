@@ -1,0 +1,41 @@
+{
+  "events": [
+    {
+      "id": 1,
+      "title": "Inside Out 2",
+      "description": "Animated feature.",
+      "startsAt": "2026-07-25T19:30:00Z",
+      "durationMinutes": 96,
+      "auditorium": "Room 1",
+      "price": 90000,
+      "bannerUrl": null,
+      "totalSeats": 60,
+      "availableSeats": 57
+    },
+    {
+      "id": 2,
+      "title": "Dune: Part Two",
+      "description": "Sci-fi epic.",
+      "startsAt": "2026-07-25T21:00:00Z",
+      "durationMinutes": 166,
+      "auditorium": "Room 2",
+      "price": 120000,
+      "bannerUrl": null,
+      "totalSeats": 60,
+      "availableSeats": 60
+    },
+    {
+      "id": 3,
+      "title": "The Old Guard",
+      "description": "Action.",
+      "startsAt": "2026-07-26T18:00:00Z",
+      "durationMinutes": 125,
+      "auditorium": "Room 1",
+      "price": 90000,
+      "bannerUrl": null,
+      "totalSeats": 60,
+      "availableSeats": 60
+    }
+  ],
+  "pagination": { "page": 1, "limit": 20, "totalItems": 3, "totalPages": 1 }
+}

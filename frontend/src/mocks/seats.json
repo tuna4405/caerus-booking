@@ -1,0 +1,365 @@
+{
+  "eventId": 1,
+  "seats": [
+    {
+      "id": 1,
+      "row": "A",
+      "number": 1,
+      "status": "available"
+    },
+    {
+      "id": 2,
+      "row": "A",
+      "number": 2,
+      "status": "booked"
+    },
+    {
+      "id": 3,
+      "row": "A",
+      "number": 3,
+      "status": "available"
+    },
+    {
+      "id": 4,
+      "row": "A",
+      "number": 4,
+      "status": "available"
+    },
+    {
+      "id": 5,
+      "row": "A",
+      "number": 5,
+      "status": "available"
+    },
+    {
+      "id": 6,
+      "row": "A",
+      "number": 6,
+      "status": "available"
+    },
+    {
+      "id": 7,
+      "row": "A",
+      "number": 7,
+      "status": "available"
+    },
+    {
+      "id": 8,
+      "row": "A",
+      "number": 8,
+      "status": "available"
+    },
+    {
+      "id": 9,
+      "row": "A",
+      "number": 9,
+      "status": "available"
+    },
+    {
+      "id": 10,
+      "row": "A",
+      "number": 10,
+      "status": "available"
+    },
+    {
+      "id": 11,
+      "row": "B",
+      "number": 1,
+      "status": "available"
+    },
+    {
+      "id": 12,
+      "row": "B",
+      "number": 2,
+      "status": "available"
+    },
+    {
+      "id": 13,
+      "row": "B",
+      "number": 3,
+      "status": "available"
+    },
+    {
+      "id": 14,
+      "row": "B",
+      "number": 4,
+      "status": "available"
+    },
+    {
+      "id": 15,
+      "row": "B",
+      "number": 5,
+      "status": "booked"
+    },
+    {
+      "id": 16,
+      "row": "B",
+      "number": 6,
+      "status": "available"
+    },
+    {
+      "id": 17,
+      "row": "B",
+      "number": 7,
+      "status": "available"
+    },
+    {
+      "id": 18,
+      "row": "B",
+      "number": 8,
+      "status": "available"
+    },
+    {
+      "id": 19,
+      "row": "B",
+      "number": 9,
+      "status": "available"
+    },
+    {
+      "id": 20,
+      "row": "B",
+      "number": 10,
+      "status": "available"
+    },
+    {
+      "id": 21,
+      "row": "C",
+      "number": 1,
+      "status": "available"
+    },
+    {
+      "id": 22,
+      "row": "C",
+      "number": 2,
+      "status": "available"
+    },
+    {
+      "id": 23,
+      "row": "C",
+      "number": 3,
+      "status": "booked"
+    },
+    {
+      "id": 24,
+      "row": "C",
+      "number": 4,
+      "status": "available"
+    },
+    {
+      "id": 25,
+      "row": "C",
+      "number": 5,
+      "status": "available"
+    },
+    {
+      "id": 26,
+      "row": "C",
+      "number": 6,
+      "status": "available"
+    },
+    {
+      "id": 27,
+      "row": "C",
+      "number": 7,
+      "status": "available"
+    },
+    {
+      "id": 28,
+      "row": "C",
+      "number": 8,
+      "status": "available"
+    },
+    {
+      "id": 29,
+      "row": "C",
+      "number": 9,
+      "status": "available"
+    },
+    {
+      "id": 30,
+      "row": "C",
+      "number": 10,
+      "status": "available"
+    },
+    {
+      "id": 31,
+      "row": "D",
+      "number": 1,
+      "status": "available"
+    },
+    {
+      "id": 32,
+      "row": "D",
+      "number": 2,
+      "status": "available"
+    },
+    {
+      "id": 33,
+      "row": "D",
+      "number": 3,
+      "status": "available"
+    },
+    {
+      "id": 34,
+      "row": "D",
+      "number": 4,
+      "status": "available"
+    },
+    {
+      "id": 35,
+      "row": "D",
+      "number": 5,
+      "status": "available"
+    },
+    {
+      "id": 36,
+      "row": "D",
+      "number": 6,
+      "status": "available"
+    },
+    {
+      "id": 37,
+      "row": "D",
+      "number": 7,
+      "status": "available"
+    },
+    {
+      "id": 38,
+      "row": "D",
+      "number": 8,
+      "status": "available"
+    },
+    {
+      "id": 39,
+      "row": "D",
+      "number": 9,
+      "status": "available"
+    },
+    {
+      "id": 40,
+      "row": "D",
+      "number": 10,
+      "status": "available"
+    },
+    {
+      "id": 41,
+      "row": "E",
+      "number": 1,
+      "status": "available"
+    },
+    {
+      "id": 42,
+      "row": "E",
+      "number": 2,
+      "status": "available"
+    },
+    {
+      "id": 43,
+      "row": "E",
+      "number": 3,
+      "status": "available"
+    },
+    {
+      "id": 44,
+      "row": "E",
+      "number": 4,
+      "status": "available"
+    },
+    {
+      "id": 45,
+      "row": "E",
+      "number": 5,
+      "status": "available"
+    },
+    {
+      "id": 46,
+      "row": "E",
+      "number": 6,
+      "status": "available"
+    },
+    {
+      "id": 47,
+      "row": "E",
+      "number": 7,
+      "status": "available"
+    },
+    {
+      "id": 48,
+      "row": "E",
+      "number": 8,
+      "status": "available"
+    },
+    {
+      "id": 49,
+      "row": "E",
+      "number": 9,
+      "status": "available"
+    },
+    {
+      "id": 50,
+      "row": "E",
+      "number": 10,
+      "status": "available"
+    },
+    {
+      "id": 51,
+      "row": "F",
+      "number": 1,
+      "status": "available"
+    },
+    {
+      "id": 52,
+      "row": "F",
+      "number": 2,
+      "status": "available"
+    },
+    {
+      "id": 53,
+      "row": "F",
+      "number": 3,
+      "status": "available"
+    },
+    {
+      "id": 54,
+      "row": "F",
+      "number": 4,
+      "status": "available"
+    },
+    {
+      "id": 55,
+      "row": "F",
+      "number": 5,
+      "status": "available"
+    },
+    {
+      "id": 56,
+      "row": "F",
+      "number": 6,
+      "status": "available"
+    },
+    {
+      "id": 57,
+      "row": "F",
+      "number": 7,
+      "status": "available"
+    },
+    {
+      "id": 58,
+      "row": "F",
+      "number": 8,
+      "status": "available"
+    },
+    {
+      "id": 59,
+      "row": "F",
+      "number": 9,
+      "status": "available"
+    },
+    {
+      "id": 60,
+      "row": "F",
+      "number": 10,
+      "status": "available"
+    }
+  ]
+}

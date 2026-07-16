@@ -1,0 +1,19 @@
+{
+  "bookings": [
+    {
+      "id": 1,
+      "userId": 2,
+      "eventId": 1,
+      "eventTitle": "Inside Out 2",
+      "startsAt": "2026-07-25T19:30:00Z",
+      "seats": [
+        { "id": 2, "row": "A", "number": 2 },
+        { "id": 15, "row": "B", "number": 5 },
+        { "id": 23, "row": "C", "number": 3 }
+      ],
+      "totalPrice": 270000,
+      "status": "confirmed",
+      "createdAt": "2026-07-15T09:12:00Z"
+    }
+  ]
+}

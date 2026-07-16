@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+lambdas/**/node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Packaged lambdas
+*.zip
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
