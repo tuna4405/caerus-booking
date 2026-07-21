@@ -13,7 +13,13 @@ exports.register = async (req, res, next) => {
   }
 };
 
-exports.login = (req, res) => {
+exports.login = async (req, res, next) => {
   // POST /auth/login — see docs/api-spec.md §3.1
-  res.status(501).json({ error: { code: 'NOT_IMPLEMENTED', message: 'auth.login not implemented yet' } });
+  try {
+    const { email, password } = req.body || {};
+    const result = await authService.loginUser({ email, password });
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
 };

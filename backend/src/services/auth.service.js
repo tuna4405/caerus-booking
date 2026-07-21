@@ -1,17 +1,17 @@
 // Business logic for POST /auth/register and /auth/login.
-// register: validate → hash (bcryptjs, cost 10) → insert → sign JWT.
+// register: validate → hash (bcryptjs, cost 10) → insert → signToken.
+// login:    validate → look up → bcrypt.compare → signToken (same 401 either way).
 // The email UNIQUE constraint (not a pre-check SELECT) enforces EMAIL_ALREADY_EXISTS.
-// TODO: login — compare passwords with bcryptjs, throw UnauthorizedError on mismatch.
+// JWT signing lives in lib/jwt.js so register, login, and the auth middleware share it.
 
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
-const { ValidationError, EmailAlreadyExistsError } = require('../lib/errors');
+const { ValidationError, EmailAlreadyExistsError, UnauthorizedError } = require('../lib/errors');
+const { signToken } = require('../lib/jwt');
 
 // A deliberately simple email check — full RFC validation isn't worth it (api-spec §3.1).
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const BCRYPT_COST = 10;
-const TOKEN_TTL = '7d';
 
 async function registerUser({ name, email, password }) {
   // 1. Validate everything before touching the DB.
@@ -49,19 +49,43 @@ async function registerUser({ name, email, password }) {
     throw err;
   }
 
-  // 4. Sign a JWT carrying id + role so protected routes need no DB lookup (api-spec §2.3).
-  const token = jwt.sign(
-    { id: user.id, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: TOKEN_TTL }
-  );
+  // 4. Sign a JWT via the shared helper (payload { id, role } — api-spec §2.3).
+  const token = signToken(user);
 
   // `user` is exactly { id, name, email, role } from RETURNING — no password_hash leaks.
   return { user, token };
 }
 
-async function login({ email, password }) {
-  throw new Error('auth.service#login not implemented yet');
+async function loginUser({ email, password }) {
+  // 1. Validate presence + type first. An empty/missing body is 400, not 401.
+  if (typeof email !== 'string' || email.trim() === '') {
+    throw new ValidationError('email is required.');
+  }
+  if (typeof password !== 'string' || password.length === 0) {
+    throw new ValidationError('password is required.');
+  }
+
+  // 2. Normalize email the same way register did on insert, then look up (parameterized).
+  const normalizedEmail = email.trim().toLowerCase();
+  const result = await pool.query(
+    `SELECT id, name, email, role, password_hash
+     FROM users
+     WHERE email = $1`,
+    [normalizedEmail]
+  );
+  const row = result.rows[0];
+
+  // 3. SECURITY (api-spec §3.1): return the identical 401 whether the email is
+  //    unknown OR the password is wrong — never reveal which, so attackers can't
+  //    enumerate registered emails.
+  if (!row || !(await bcrypt.compare(password, row.password_hash))) {
+    throw new UnauthorizedError('Invalid email or password.');
+  }
+
+  // 4. Strip password_hash; shape `user` exactly like registerUser returns it.
+  const user = { id: row.id, name: row.name, email: row.email, role: row.role };
+  const token = signToken(user);
+  return { user, token };
 }
 
-module.exports = { registerUser, login };
+module.exports = { registerUser, loginUser };
