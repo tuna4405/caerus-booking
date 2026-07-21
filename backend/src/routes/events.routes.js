@@ -5,8 +5,8 @@ const requireAdmin = require('../middleware/requireAdmin');
 
 const router = express.Router();
 
-router.get('/', eventsController.list);
-router.get('/:id', eventsController.getById);
+router.get('/', eventsController.listEvents);
+router.get('/:id', eventsController.getEventById);
 router.post('/', auth, requireAdmin, eventsController.create);
 router.post('/:id/banner', auth, requireAdmin, eventsController.uploadBanner);
 

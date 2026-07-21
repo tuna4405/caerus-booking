@@ -1,13 +1,26 @@
-// TODO: wire these up to services/events.service.js once it's implemented.
+// Thin HTTP layer for events. GET / and GET /:id are live (public); the admin
+// handlers below are still stubs.
+const eventsService = require('../services/events.service');
 
-exports.list = (req, res) => {
-  // GET /events — see docs/api-spec.md §3.2
-  res.status(501).json({ error: { code: 'NOT_IMPLEMENTED', message: 'events.list not implemented yet' } });
+exports.listEvents = async (req, res, next) => {
+  // GET /events (public) — see docs/api-spec.md §3.2
+  try {
+    const { date, page, limit } = req.query;
+    const result = await eventsService.listEvents({ date, page, limit });
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
 };
 
-exports.getById = (req, res) => {
-  // GET /events/:id — see docs/api-spec.md §3.2
-  res.status(501).json({ error: { code: 'NOT_IMPLEMENTED', message: 'events.getById not implemented yet' } });
+exports.getEventById = async (req, res, next) => {
+  // GET /events/:id (public) — see docs/api-spec.md §3.2
+  try {
+    const event = await eventsService.getEventById(req.params.id);
+    res.status(200).json(event);
+  } catch (err) {
+    next(err);
+  }
 };
 
 exports.create = (req, res) => {

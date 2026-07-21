@@ -1,14 +1,140 @@
 // Business logic for events + seats.
-// TODO: implement against db/config/db.js — see queries in
-// docs/database-schema.md §6.1 (list) and §6.2 (seat map), and the seat
-// auto-generation statement in §3.3.
+// listEvents() and getEventById() share ONE event SELECT + one row-mapping helper
+// (mapEventRow) so the event shape and computed seat counts aren't duplicated.
+// totalSeats / availableSeats are COMPUTED, not columns (schema doc §6.1).
+// getSeatMap() returns one event's seat map (§6.2). TODO: create() auto-generates
+// the seat map (§3.3).
 
-async function list({ date, page, limit }) {
-  throw new Error('events.service#list not implemented yet');
+const pool = require('../config/db');
+const { ValidationError, NotFoundError } = require('../lib/errors');
+
+// Shared SELECT: an event plus its computed seat counts (schema doc §6.1).
+// Each caller appends its own WHERE / GROUP BY / ORDER / LIMIT.
+const EVENT_SELECT = `
+  SELECT e.id, e.title, e.description, e.starts_at, e.duration_minutes,
+         e.auditorium, e.price, e.banner_url,
+         COUNT(s.id)                                       AS total_seats,
+         COUNT(s.id) FILTER (WHERE s.status = 'available') AS available_seats
+  FROM events e
+  LEFT JOIN seats s ON s.event_id = e.id
+`;
+
+// DB row → API event object (snake_case → camelCase, schema doc §2).
+// COUNT() returns bigint, which pg hands back as a string — coerce to Number.
+function mapEventRow(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    startsAt: row.starts_at,
+    durationMinutes: row.duration_minutes,
+    auditorium: row.auditorium,
+    price: row.price,
+    bannerUrl: row.banner_url, // null until a banner is uploaded
+    totalSeats: Number(row.total_seats),
+    availableSeats: Number(row.available_seats),
+  };
 }
 
-async function getById(id) {
-  throw new Error('events.service#getById not implemented yet');
+// Garbage page/limit fall back to defaults (never crash); caller caps the limit.
+function normalizePositiveInt(value, fallback) {
+  const n = Number.parseInt(value, 10);
+  return Number.isInteger(n) && n > 0 ? n : fallback;
+}
+
+// A date filter, if present, must be a real YYYY-MM-DD calendar date → else 400.
+// (A malformed filter is a client error; silently ignoring it would mislead.)
+function normalizeDate(date) {
+  if (date === undefined || date === null || date === '') {
+    return null;
+  }
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new ValidationError('date must be a valid YYYY-MM-DD date.');
+  }
+  const [y, m, d] = date.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) {
+    throw new ValidationError('date must be a valid YYYY-MM-DD date.');
+  }
+  return date;
+}
+
+// :id must be a positive int within PostgreSQL's int4 range; else null → 404.
+function parseEventId(id) {
+  if (!/^\d+$/.test(String(id))) {
+    return null;
+  }
+  const n = Number(id);
+  if (n <= 0 || n > 2147483647) {
+    return null;
+  }
+  return n;
+}
+
+async function listEvents({ date, page, limit }) {
+  const safePage = normalizePositiveInt(page, 1);
+  const safeLimit = Math.min(normalizePositiveInt(limit, 20), 50); // clamp > 50 to 50
+  const offset = (safePage - 1) * safeLimit;
+  const dateFilter = normalizeDate(date);
+
+  // Shared WHERE: upcoming events only, plus the optional date filter.
+  const conditions = ['e.starts_at >= now()'];
+  const whereParams = [];
+  if (dateFilter) {
+    whereParams.push(dateFilter);
+    conditions.push(`(e.starts_at AT TIME ZONE 'UTC')::date = $${whereParams.length}::date`);
+  }
+  const whereClause = `WHERE ${conditions.join(' AND ')}`;
+
+  // 1. One page of events, soonest first, with computed seat counts (schema §6.1).
+  const limitPlaceholder = `$${whereParams.length + 1}`;
+  const offsetPlaceholder = `$${whereParams.length + 2}`;
+  const listResult = await pool.query(
+    `${EVENT_SELECT}
+     ${whereClause}
+     GROUP BY e.id
+     ORDER BY e.starts_at
+     LIMIT ${limitPlaceholder} OFFSET ${offsetPlaceholder}`,
+    [...whereParams, safeLimit, offset]
+  );
+
+  // 2. Total count over the SAME where-conditions (no limit/offset) for pagination.
+  const countResult = await pool.query(
+    `SELECT COUNT(*) AS total FROM events e ${whereClause}`,
+    whereParams
+  );
+  const totalItems = Number(countResult.rows[0].total);
+
+  return {
+    events: listResult.rows.map(mapEventRow),
+    pagination: {
+      page: safePage,
+      limit: safeLimit,
+      totalItems,
+      totalPages: Math.ceil(totalItems / safeLimit),
+    },
+  };
+}
+
+async function getEventById(id) {
+  // Non-numeric / out-of-range id → 404 (never a 500).
+  const eventId = parseEventId(id);
+  if (eventId === null) {
+    throw new NotFoundError('Event not found.');
+  }
+
+  // Same SELECT + computed counts as the list, but by id and WITHOUT the
+  // "upcoming only" filter — a direct link should work even once a show has started.
+  const result = await pool.query(
+    `${EVENT_SELECT}
+     WHERE e.id = $1
+     GROUP BY e.id`,
+    [eventId]
+  );
+  if (result.rows.length === 0) {
+    throw new NotFoundError('Event not found.');
+  }
+  return mapEventRow(result.rows[0]);
 }
 
 async function create(eventData) {
@@ -20,7 +146,40 @@ async function uploadBanner(id, file) {
 }
 
 async function getSeatMap(eventId) {
-  throw new Error('events.service#getSeatMap not implemented yet');
+  // Validate the id up front (non-numeric / out-of-range → 404, never 500).
+  const id = parseEventId(eventId);
+  if (id === null) {
+    throw new NotFoundError('Event not found.');
+  }
+
+  // Existence check: a real event with no seats and a non-existent event BOTH
+  // yield zero seat rows, but the spec distinguishes them (200 vs 404). So we
+  // confirm the event exists rather than inferring it from the seat count.
+  const eventExists = await pool.query('SELECT 1 FROM events WHERE id = $1', [id]);
+  if (eventExists.rows.length === 0) {
+    throw new NotFoundError('Event not found.');
+  }
+
+  // Seat map, ordered so the frontend renders rows top-to-bottom (schema doc §6.2).
+  // seat_number is INTEGER, so it orders 1..10 numerically (not 1,10,2).
+  const result = await pool.query(
+    `SELECT id, seat_row, seat_number, status
+     FROM seats
+     WHERE event_id = $1
+     ORDER BY seat_row, seat_number`,
+    [id]
+  );
+
+  // snake_case → camelCase / API names (schema doc §2): seat_row → row, seat_number → number.
+  return {
+    eventId: id,
+    seats: result.rows.map((s) => ({
+      id: s.id,
+      row: s.seat_row,
+      number: s.seat_number,
+      status: s.status,
+    })),
+  };
 }
 
-module.exports = { list, getById, create, uploadBanner, getSeatMap };
+module.exports = { listEvents, getEventById, create, uploadBanner, getSeatMap };
