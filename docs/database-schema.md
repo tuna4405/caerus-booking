@@ -318,6 +318,7 @@ backend/db/
 
 Dockerized Postgres for local dev:
 
+**Note**: local dev uses host port 5433 (avoids a local Postgres on 5432); container is still 5432 internally
 ```yaml
 # backend/docker-compose.yml
 services:
