@@ -4,8 +4,8 @@
 -- Passwords are 'password123' hashed with bcrypt (cost 10).
 -- Generate real hashes with: node -e "console.log(require('bcryptjs').hashSync('password123', 10))"
 INSERT INTO users (name, email, password_hash, role) VALUES
-  ('Admin',        'admin@caerus.local', '<bcrypt-hash-here>', 'admin'),
-  ('Nguyen Van A', 'a@example.com',      '<bcrypt-hash-here>', 'customer');
+  ('Admin',        'admin@caerus.local', '$2a$10$9d/Q6IQdMQQeYdg5OONiOu7k4fSROTod0v3S0bwm7dIRSVO5HNod.', 'admin'),
+  ('Nguyen Van A', 'a@example.com',      '$2a$10$9d/Q6IQdMQQeYdg5OONiOu7k4fSROTod0v3S0bwm7dIRSVO5HNod.', 'customer');
 
 INSERT INTO events (title, description, starts_at, duration_minutes, auditorium, price) VALUES
   ('Inside Out 2',   'Animated feature.',       '2026-07-25T19:30:00Z',  96, 'Room 1',  90000),
