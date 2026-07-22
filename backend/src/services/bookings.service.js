@@ -1,14 +1,138 @@
 // Business logic for bookings.
-// getMyBookings() powers GET /bookings (api-spec §3.4, query in schema doc §6.3).
-// TODO: create() must run the atomic SELECT ... FOR UPDATE transaction in
-// docs/database-schema.md §5.1. cancel() must run the transaction in §5.2.
-// Both are the critical correctness paths of this project — do not
-// shortcut the row locking.
+// createBooking() runs the atomic SELECT ... FOR UPDATE transaction (schema §5.1) —
+// the no-double-booking guarantee. getMyBookings() powers GET /bookings (§6.3).
+// TODO: cancel() must run the transaction in §5.2. Do not shortcut the row locking.
 
 const pool = require('../config/db');
+const { ValidationError, NotFoundError, SeatAlreadyBookedError } = require('../lib/errors');
 
-async function create({ userId, eventId, seatIds }) {
-  throw new Error('bookings.service#create not implemented yet');
+const MAX_INT4 = 2147483647; // PostgreSQL int4 upper bound — reject ids beyond it (no 500).
+
+async function createBooking({ userId, eventId, seatIds }) {
+  // --- Validation BEFORE opening a transaction (api-spec §3.4) ---
+  if (!Number.isInteger(eventId) || eventId <= 0 || eventId > MAX_INT4) {
+    throw new ValidationError('eventId must be a positive integer.');
+  }
+  if (!Array.isArray(seatIds) || seatIds.length === 0) {
+    throw new ValidationError('seatIds must be a non-empty array.');
+  }
+  if (seatIds.length > 6) {
+    throw new ValidationError('A booking may contain at most 6 seats.');
+  }
+  if (!seatIds.every((id) => Number.isInteger(id) && id > 0 && id <= MAX_INT4)) {
+    throw new ValidationError('seatIds must all be positive integers.');
+  }
+  // Duplicate ids would double-charge and violate the booking_seats PK — reject clearly.
+  if (new Set(seatIds).size !== seatIds.length) {
+    throw new ValidationError('seatIds must not contain duplicates.');
+  }
+
+  // --- The transaction (schema doc §5.1, implemented exactly) ---
+  // One pooled client so BEGIN/COMMIT/ROLLBACK all run on the SAME connection.
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Lock the requested seat rows. ORDER BY id gives every concurrent
+    //    transaction the SAME lock order → prevents deadlocks. Keep the ORDER BY.
+    const locked = await client.query(
+      `SELECT id, seat_row, seat_number, status
+       FROM seats
+       WHERE id = ANY($1) AND event_id = $2
+       ORDER BY id
+       FOR UPDATE`,
+      [seatIds, eventId]
+    );
+
+    // 2a. Fewer rows than requested → a seatId isn't a seat of this event. Distinguish
+    //     "no such event" (404) from "event exists but a seat id is bogus" (400).
+    if (locked.rows.length !== seatIds.length) {
+      const eventExists = await client.query('SELECT 1 FROM events WHERE id = $1', [eventId]);
+      if (eventExists.rows.length === 0) {
+        throw new NotFoundError('Event not found.');
+      }
+      throw new ValidationError('One or more seatIds are not seats of this event.');
+    }
+
+    // 2b. Any locked seat already booked → 409 with the conflicting ids for the UI.
+    const conflictingSeatIds = locked.rows
+      .filter((s) => s.status !== 'available')
+      .map((s) => s.id);
+    if (conflictingSeatIds.length > 0) {
+      throw new SeatAlreadyBookedError(conflictingSeatIds);
+    }
+
+    // 3. Snapshot the event price (schema doc §3.4); grab title/startsAt for the response.
+    const eventResult = await client.query(
+      'SELECT title, starts_at, price FROM events WHERE id = $1',
+      [eventId]
+    );
+    const event = eventResult.rows[0];
+    const totalPrice = event.price * seatIds.length;
+
+    // 4. Create the booking.
+    const bookingResult = await client.query(
+      `INSERT INTO bookings (user_id, event_id, total_price)
+       VALUES ($1, $2, $3)
+       RETURNING id, status, created_at`,
+      [userId, eventId, totalPrice]
+    );
+    const booking = bookingResult.rows[0];
+
+    // 5. Attach the seats.
+    await client.query(
+      `INSERT INTO booking_seats (booking_id, seat_id)
+       SELECT $1, unnest($2::int[])`,
+      [booking.id, seatIds]
+    );
+
+    // 6. Flip the seats to booked. Defense in depth (schema doc §5.1): the extra
+    //    AND status='available' guard + row-count assert catches any lock bypass.
+    const updated = await client.query(
+      `UPDATE seats SET status = 'booked'
+       WHERE id = ANY($1) AND status = 'available'`,
+      [seatIds]
+    );
+    if (updated.rowCount !== seatIds.length) {
+      // Impossible while the FOR UPDATE lock holds — bail loudly rather than commit.
+      throw new Error(
+        `Seat update affected ${updated.rowCount} rows, expected ${seatIds.length} — lock bypass?`
+      );
+    }
+
+    await client.query('COMMIT');
+
+    // Assemble the 201 booking object (camelCase, schema doc §2). Seats come from the
+    // step-1 rows, ordered row then number to match GET /bookings.
+    const seats = locked.rows
+      .slice()
+      .sort((a, b) =>
+        a.seat_row === b.seat_row
+          ? a.seat_number - b.seat_number
+          : a.seat_row.localeCompare(b.seat_row)
+      )
+      .map((s) => ({ id: s.id, row: s.seat_row, number: s.seat_number }));
+
+    return {
+      id: booking.id,
+      userId,
+      eventId,
+      eventTitle: event.title,
+      startsAt: event.starts_at,
+      seats,
+      totalPrice,
+      status: booking.status,
+      createdAt: booking.created_at,
+    };
+  } catch (err) {
+    // Any failure: never leave a txn open. Swallow a rollback error so the real
+    // error (validation/conflict/etc.) is what propagates to the errorHandler.
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    // Always hand the pooled client back, success or failure.
+    client.release();
+  }
 }
 
 async function getMyBookings(userId) {
@@ -78,4 +202,4 @@ async function cancel(id, requestingUser) {
   throw new Error('bookings.service#cancel not implemented yet');
 }
 
-module.exports = { create, getMyBookings, getById, cancel };
+module.exports = { createBooking, getMyBookings, getById, cancel };

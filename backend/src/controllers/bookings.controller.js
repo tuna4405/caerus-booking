@@ -3,9 +3,20 @@
 // docs/database-schema.md §5.1 before touching bookings.service.js.
 const bookingsService = require('../services/bookings.service');
 
-exports.create = (req, res) => {
-  // POST /bookings 🔒 — see docs/api-spec.md §3.4
-  res.status(501).json({ error: { code: 'NOT_IMPLEMENTED', message: 'bookings.create not implemented yet' } });
+exports.createBooking = async (req, res, next) => {
+  // POST /bookings 🔒 — see docs/api-spec.md §3.4. userId comes from the JWT
+  // (req.user), never the body: a user always books as themselves.
+  try {
+    const { eventId, seatIds } = req.body || {};
+    const booking = await bookingsService.createBooking({
+      userId: req.user.id,
+      eventId,
+      seatIds,
+    });
+    res.status(201).json({ booking });
+  } catch (err) {
+    next(err);
+  }
 };
 
 exports.getMyBookings = async (req, res, next) => {
