@@ -209,8 +209,64 @@ async function getMyBookings(userId) {
   }));
 }
 
-async function getById(id, requestingUser) {
-  throw new Error('bookings.service#getById not implemented yet');
+async function getBookingById({ bookingId, userId, userRole }) {
+  // Validate the id — non-numeric / out-of-range → 404 (a booking that can't exist),
+  // never a 500. Plain read: no transaction needed (unlike create/cancel).
+  const id = parseId(bookingId);
+  if (id === null) {
+    throw new NotFoundError('Booking not found.');
+  }
+
+  // 1. The booking, joined to its event for title/startsAt — the SAME SELECT columns
+  //    getMyBookings uses, just filtered to one id instead of a whole user's list.
+  const bookingResult = await pool.query(
+    `SELECT b.id, b.user_id, b.event_id, b.total_price, b.status, b.created_at,
+            e.title AS event_title, e.starts_at
+     FROM bookings b
+     JOIN events e ON e.id = b.event_id
+     WHERE b.id = $1`,
+    [id]
+  );
+  const b = bookingResult.rows[0];
+
+  // 2. Ownership (same rule + ordering as cancelBooking): 404 before 403.
+  if (!b) {
+    throw new NotFoundError('Booking not found.');
+  }
+  const isOwner = b.user_id === userId;
+  const isAdmin = userRole === 'admin';
+  if (!isOwner && !isAdmin) {
+    throw new ForbiddenError('You do not have access to this booking.');
+  }
+
+  // 3. That booking's seats — the SAME booking_seats→seats query + row/number mapping
+  //    getMyBookings uses, narrowed to one booking.
+  const seatsResult = await pool.query(
+    `SELECT s.id, s.seat_row, s.seat_number
+     FROM booking_seats bs
+     JOIN seats s ON s.id = bs.seat_id
+     WHERE bs.booking_id = $1
+     ORDER BY s.seat_row, s.seat_number`,
+    [id]
+  );
+  const seats = seatsResult.rows.map((s) => ({
+    id: s.id,
+    row: s.seat_row,
+    number: s.seat_number,
+  }));
+
+  // 4. Assemble the SAME booking-object shape getMyBookings returns (camelCase, §2).
+  return {
+    id: b.id,
+    userId: b.user_id,
+    eventId: b.event_id,
+    eventTitle: b.event_title,
+    startsAt: b.starts_at,
+    seats,
+    totalPrice: b.total_price,
+    status: b.status,
+    createdAt: b.created_at,
+  };
 }
 
 async function cancelBooking({ bookingId, userId, userRole }) {
@@ -284,4 +340,4 @@ async function cancelBooking({ bookingId, userId, userRole }) {
   }
 }
 
-module.exports = { createBooking, getMyBookings, getById, cancelBooking };
+module.exports = { createBooking, getMyBookings, getBookingById, cancelBooking };

@@ -30,9 +30,19 @@ exports.getMyBookings = async (req, res, next) => {
   }
 };
 
-exports.getById = (req, res) => {
-  // GET /bookings/:id 🔒 — see docs/api-spec.md §3.4
-  res.status(501).json({ error: { code: 'NOT_IMPLEMENTED', message: 'bookings.getById not implemented yet' } });
+exports.getBookingById = async (req, res, next) => {
+  // GET /bookings/:id 🔒 — one booking (api-spec §3.4). Owners read their own;
+  // admins read any (ownership enforced in the service, 404 before 403).
+  try {
+    const booking = await bookingsService.getBookingById({
+      bookingId: req.params.id,
+      userId: req.user.id,
+      userRole: req.user.role,
+    });
+    res.status(200).json(booking);
+  } catch (err) {
+    next(err);
+  }
 };
 
 exports.cancelBooking = async (req, res, next) => {
