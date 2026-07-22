@@ -23,9 +23,15 @@ exports.getEventById = async (req, res, next) => {
   }
 };
 
-exports.create = (req, res) => {
-  // POST /events 🔒👑 — see docs/api-spec.md §3.2
-  res.status(501).json({ error: { code: 'NOT_IMPLEMENTED', message: 'events.create not implemented yet' } });
+exports.createEvent = async (req, res, next) => {
+  // POST /events 🔒👑 — admin creates an event + its 60 seats (api-spec §3.2).
+  // auth + requireAdmin run before this; the body is validated in the service.
+  try {
+    const event = await eventsService.createEvent(req.body || {});
+    res.status(201).json(event);
+  } catch (err) {
+    next(err);
+  }
 };
 
 exports.uploadBanner = (req, res) => {

@@ -2,8 +2,8 @@
 // listEvents() and getEventById() share ONE event SELECT + one row-mapping helper
 // (mapEventRow) so the event shape and computed seat counts aren't duplicated.
 // totalSeats / availableSeats are COMPUTED, not columns (schema doc §6.1).
-// getSeatMap() returns one event's seat map (§6.2). TODO: create() auto-generates
-// the seat map (§3.3).
+// getSeatMap() returns one event's seat map (§6.2). createEvent() inserts an event
+// and auto-generates its 60 seats in ONE transaction (§3.3).
 
 const pool = require('../config/db');
 const { ValidationError, NotFoundError } = require('../lib/errors');
@@ -137,8 +137,81 @@ async function getEventById(id) {
   return mapEventRow(result.rows[0]);
 }
 
-async function create(eventData) {
-  throw new Error('events.service#create not implemented yet');
+async function createEvent(eventData) {
+  const { title, description, startsAt, durationMinutes, auditorium, price } = eventData || {};
+
+  // --- Validation BEFORE the transaction, so failures are clean 400s (not caught
+  //     DB CHECK errors). We validate here even though the DB also constrains. ---
+  if (typeof title !== 'string' || title.trim() === '') {
+    throw new ValidationError('title is required.');
+  }
+  // description is optional; if present it must be a string (DB defaults to '').
+  if (description !== undefined && description !== null && typeof description !== 'string') {
+    throw new ValidationError('description must be a string.');
+  }
+  if (typeof startsAt !== 'string' || Number.isNaN(Date.parse(startsAt))) {
+    throw new ValidationError('startsAt must be a valid ISO 8601 date string.');
+  }
+  if (!Number.isInteger(durationMinutes) || durationMinutes <= 0) {
+    throw new ValidationError('durationMinutes must be a positive integer.');
+  }
+  if (typeof auditorium !== 'string' || auditorium.trim() === '') {
+    throw new ValidationError('auditorium is required.');
+  }
+  if (!Number.isInteger(price) || price < 0) {
+    throw new ValidationError('price must be an integer >= 0 (VND, no decimals).');
+  }
+
+  // Normalize: trim strings; default description to '' when omitted.
+  const cleanTitle = title.trim();
+  const cleanDescription = description === undefined || description === null ? '' : description;
+  const cleanAuditorium = auditorium.trim();
+  const startsAtDate = new Date(startsAt); // validated above; pg stores it as TIMESTAMPTZ
+
+  // --- The transaction: event insert + seat generation are ATOMIC (schema §3.3).
+  //     If seat generation fails, the event must NOT exist. ---
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Insert the event. banner_url is left NULL (set later by the banner endpoint).
+    const eventResult = await client.query(
+      `INSERT INTO events (title, description, starts_at, duration_minutes, auditorium, price)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id`,
+      [cleanTitle, cleanDescription, startsAtDate, durationMinutes, cleanAuditorium, price]
+    );
+    const eventId = eventResult.rows[0].id;
+
+    // 2. Auto-generate the fixed 6×10 seat map: A1..A10 … F1..F10 = 60 seats, all
+    //    default status 'available' (schema doc §3.3). chr(64+r): 65='A' … 70='F'.
+    await client.query(
+      `INSERT INTO seats (event_id, seat_row, seat_number)
+       SELECT $1, chr(64 + r), n
+       FROM generate_series(1, 6)  AS r,
+            generate_series(1, 10) AS n`,
+      [eventId]
+    );
+
+    // 3. Re-fetch the new event WITH computed seat counts via the shared SELECT — the
+    //    just-inserted seats are visible inside this txn, so totalSeats/available = 60.
+    const created = await client.query(
+      `${EVENT_SELECT}
+       WHERE e.id = $1
+       GROUP BY e.id`,
+      [eventId]
+    );
+
+    await client.query('COMMIT');
+
+    // Same shape as GET /events/:id (bannerUrl null, counts 60/60), via mapEventRow.
+    return mapEventRow(created.rows[0]);
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 async function uploadBanner(id, file) {
@@ -182,4 +255,4 @@ async function getSeatMap(eventId) {
   };
 }
 
-module.exports = { listEvents, getEventById, create, uploadBanner, getSeatMap };
+module.exports = { listEvents, getEventById, createEvent, uploadBanner, getSeatMap };
