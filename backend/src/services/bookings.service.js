@@ -1,12 +1,27 @@
 // Business logic for bookings.
 // createBooking() runs the atomic SELECT ... FOR UPDATE transaction (schema §5.1) —
-// the no-double-booking guarantee. getMyBookings() powers GET /bookings (§6.3).
-// TODO: cancel() must run the transaction in §5.2. Do not shortcut the row locking.
+// the no-double-booking guarantee. cancelBooking() runs the reverse transaction
+// (§5.2) — free the seats. getMyBookings() powers GET /bookings (§6.3).
+// Do not shortcut the row locking in either transaction.
 
 const pool = require('../config/db');
-const { ValidationError, NotFoundError, SeatAlreadyBookedError } = require('../lib/errors');
+const {
+  ValidationError,
+  NotFoundError,
+  SeatAlreadyBookedError,
+  ForbiddenError,
+  BookingNotCancellableError,
+} = require('../lib/errors');
 
 const MAX_INT4 = 2147483647; // PostgreSQL int4 upper bound — reject ids beyond it (no 500).
+
+// A route :id → positive int within int4 range, or null (caller returns 404).
+function parseId(value) {
+  if (!/^\d+$/.test(String(value))) return null;
+  const n = Number(value);
+  if (n <= 0 || n > MAX_INT4) return null;
+  return n;
+}
 
 async function createBooking({ userId, eventId, seatIds }) {
   // --- Validation BEFORE opening a transaction (api-spec §3.4) ---
@@ -198,8 +213,75 @@ async function getById(id, requestingUser) {
   throw new Error('bookings.service#getById not implemented yet');
 }
 
-async function cancel(id, requestingUser) {
-  throw new Error('bookings.service#cancel not implemented yet');
+async function cancelBooking({ bookingId, userId, userRole }) {
+  // Validate the id up front — non-numeric / out-of-range → 404 (a booking that
+  // can't exist), never a 500.
+  const id = parseId(bookingId);
+  if (id === null) {
+    throw new NotFoundError('Booking not found.');
+  }
+
+  // --- The transaction (schema doc §5.2, implemented exactly) ---
+  // One pooled client so BEGIN/COMMIT/ROLLBACK all run on the SAME connection.
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Lock the booking row + its event's start time, so a double-cancel or a
+    //    race with ticket generation can't interleave (schema doc §5.2).
+    const locked = await client.query(
+      `SELECT b.id, b.user_id, b.status, e.starts_at
+       FROM bookings b
+       JOIN events e ON e.id = b.event_id
+       WHERE b.id = $1
+       FOR UPDATE`,
+      [id]
+    );
+    const booking = locked.rows[0];
+
+    // 2. Checks in code, in this order (schema doc §5.2):
+    //    404 FIRST — you can't judge ownership of a booking that doesn't exist.
+    if (!booking) {
+      throw new NotFoundError('Booking not found.');
+    }
+    //    403 — not the owner, and not an admin (admins may cancel any booking).
+    const isOwner = booking.user_id === userId;
+    const isAdmin = userRole === 'admin';
+    if (!isOwner && !isAdmin) {
+      throw new ForbiddenError('You do not have access to this booking.');
+    }
+    //    409 — already cancelled (status is no longer 'confirmed').
+    if (booking.status !== 'confirmed') {
+      throw new BookingNotCancellableError('This booking has already been cancelled.');
+    }
+    //    409 — the show has already started (cancellable only BEFORE starts_at, no buffer).
+    if (new Date(booking.starts_at).getTime() <= Date.now()) {
+      throw new BookingNotCancellableError(
+        'This booking can no longer be cancelled — the show has already started.'
+      );
+    }
+
+    // 3. Flip the booking to cancelled. The row SURVIVES (history) — never hard-deleted.
+    await client.query(
+      `UPDATE bookings SET status = 'cancelled', cancelled_at = now() WHERE id = $1`,
+      [id]
+    );
+
+    // 4. Free the booking's seats back to available.
+    await client.query(
+      `UPDATE seats SET status = 'available'
+       WHERE id IN (SELECT seat_id FROM booking_seats WHERE booking_id = $1)`,
+      [id]
+    );
+
+    await client.query('COMMIT');
+    // Nothing to return — the controller responds 204 No Content.
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
-module.exports = { createBooking, getMyBookings, getById, cancel };
+module.exports = { createBooking, getMyBookings, getById, cancelBooking };

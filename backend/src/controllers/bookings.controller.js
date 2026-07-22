@@ -35,7 +35,17 @@ exports.getById = (req, res) => {
   res.status(501).json({ error: { code: 'NOT_IMPLEMENTED', message: 'bookings.getById not implemented yet' } });
 };
 
-exports.cancel = (req, res) => {
-  // DELETE /bookings/:id 🔒 — see the transaction in docs/database-schema.md §5.2
-  res.status(501).json({ error: { code: 'NOT_IMPLEMENTED', message: 'bookings.cancel not implemented yet' } });
+exports.cancelBooking = async (req, res, next) => {
+  // DELETE /bookings/:id 🔒 — cancel + free seats (api-spec §3.4, txn schema §5.2).
+  // Admins may cancel any booking; owners only their own (enforced in the service).
+  try {
+    await bookingsService.cancelBooking({
+      bookingId: req.params.id,
+      userId: req.user.id,
+      userRole: req.user.role,
+    });
+    res.status(204).end(); // 204 No Content — nothing to return.
+  } catch (err) {
+    next(err);
+  }
 };
