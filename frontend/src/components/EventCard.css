@@ -83,7 +83,7 @@
 .caerus-event-card-shape--square {
   width: calc(var(--card-footer-height) * 0.4);
   height: calc(var(--card-footer-height) * 0.4);
-  left: calc(var(--card-footer-height) * 0.05);
+  left: calc(var(--card-footer-height) * 0.035);
   bottom: calc(var(--card-footer-height) * -0.27);
   background: var(--color-action);
   transform: rotate(-15deg);

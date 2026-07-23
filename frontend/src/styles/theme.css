@@ -130,8 +130,8 @@
      Corners are rounded at 10px per the current Figma design. Components must
      use var(--radius) / var(--radius-card) — never hardcode a radius. */
 
-  --radius:       10px;  /* buttons, inputs */
-  --radius-card:  10px;  /* cards, panels */
+  --radius:       5px;  /* buttons, inputs */
+  --radius-card:  5px;  /* cards, panels */
 
   --border-width: 2px;    /* the Login button's outline weight, active nav underline */
   --border-hairline: 1px; /* header / divider hairlines */
