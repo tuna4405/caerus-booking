@@ -70,7 +70,7 @@ export default function EventList() {
 
   return (
     <main className="caerus-container caerus-eventlist">
-      <h1>Now showing</h1>
+      <h1 className="caerus-eventlist-heading">IN <span>CINEMAS</span></h1>
 
       <div className="caerus-eventlist-filter">
         <label className="caerus-eventlist-field">
@@ -105,12 +105,7 @@ export default function EventList() {
       ) : events.length === 0 ? (
         <div className="caerus-eventlist-state">
           {date ? (
-            <>
-              <p>No screenings on that date.</p>
-              <Button variant="secondary" onClick={clearDate}>
-                Clear
-              </Button>
-            </>
+            <p>No screenings on that date.</p>
           ) : (
             <p>No upcoming screenings yet.</p>
           )}

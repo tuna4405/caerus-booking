@@ -6,7 +6,7 @@
   background: var(--color-danger-bg);
   color: var(--color-danger);
   border: var(--border-width) solid var(--color-danger);
-  border-radius: var(--radius); /* 0 — square by design */
+  border-radius: var(--radius);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
 }

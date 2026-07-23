@@ -127,14 +127,21 @@
   --space-9:  96px;
 
   /* --- Shape --------------------------------------------------------------
-     The mockup is deliberately sharp-cornered. Keep it that way: rounded
-     corners are the fastest way to make this look like a different design. */
+     Corners are rounded at 10px per the current Figma design. Components must
+     use var(--radius) / var(--radius-card) — never hardcode a radius. */
 
-  --radius:       0px;   /* buttons, inputs — square, per mockup */
-  --radius-card:  2px;   /* cards, panels — a hair of softening */
+  --radius:       10px;  /* buttons, inputs */
+  --radius-card:  10px;  /* cards, panels */
 
   --border-width: 2px;    /* the Login button's outline weight, active nav underline */
-  --border-hairline: 1px; /* header / divider hairlines (only 2px existed before) */
+  --border-hairline: 1px; /* header / divider hairlines */
+
+  /* --- Controls (shared button + input sizing) ---------------------------- */
+
+  --control-height:  38px;                /* buttons AND inputs share this height */
+  --btn-padding-x:   var(--space-4);
+  --btn-font-size:   var(--text-sm);
+  --btn-font-weight: var(--weight-medium);
 
   /* --- Elevation ----------------------------------------------------------
      The mockup is flat. Shadows are for overlays only (modals, dropdowns). */
@@ -148,8 +155,10 @@
   --container-narrow: 420px;  /* centered single-column forms (auth screens) */
   --container-pad:  var(--space-5);
   --header-height:  72px;
-  --logo-height:    32px;     /* navbar logo image height (width auto) */
-  --card-min-width: 280px;    /* event grid: min column width before wrapping */
+  --logo-height:    32px;       /* navbar logo image height (width auto) */
+  --card-min-width: 170px;      /* event grid: min column track width */
+  --card-width:     220px;      /* event card natural (max) width */
+  --card-footer-height: 108px;  /* event card decorative footer height */
 
   /* --- Motion --------------------------------------------------------------- */
 

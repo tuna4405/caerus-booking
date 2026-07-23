@@ -20,7 +20,7 @@
   background: var(--color-bg);
   padding: var(--space-3) var(--space-4);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius); /* 0 — square by design */
+  border-radius: var(--radius);
   transition: border-color var(--transition-fast);
 }
 

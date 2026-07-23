@@ -1,70 +1,62 @@
 // Props: { event } — shape from GET /events (docs/api-spec.md §3.2).
-// All presentation lives here; the list page only fetches and lays out.
+// Portrait card: a 2:3 poster over a decorative info footer (docs/design/event-card.png).
+// Only title, date+time, and availability appear here — price lives on the detail page.
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { formatDateTime, formatDuration, formatPrice } from '../utils/format';
+import { formatDateTime } from '../utils/format';
 import './EventCard.css';
 
-function Availability({ availableSeats, totalSeats }) {
-  if (availableSeats <= 0) {
-    return <span className="caerus-event-card-badge">Sold out</span>;
-  }
-  if (availableSeats <= 10) {
-    return (
-      <span className="caerus-event-card-avail caerus-event-card-avail--low">
-        Only {availableSeats} seats left
-      </span>
-    );
-  }
-  return (
-    <span className="caerus-event-card-avail caerus-event-card-avail--muted">
-      {availableSeats} of {totalSeats} seats available
-    </span>
-  );
+function availabilityText(availableSeats, totalSeats) {
+  if (availableSeats === 0) return 'Sold out';
+  if (availableSeats <= 10) return `Only ${availableSeats} left`;
+  return `${availableSeats}/${totalSeats} available`;
 }
 
 export default function EventCard({ event }) {
-  const soldOut = event.availableSeats <= 0;
+  // Fall back to the letter placeholder if the poster URL fails to load
+  // (bad S3 URL, missing object, wrong bucket policy) — no broken-image icon.
+  const [imgFailed, setImgFailed] = useState(false);
+
+  const soldOut = event.availableSeats === 0;
   const initial = (event.title?.trim()?.[0] ?? '?').toUpperCase();
+  const showImage = Boolean(event.bannerUrl) && !imgFailed;
 
   return (
     <Link
       to={`/events/${event.id}`}
       className={`caerus-event-card${soldOut ? ' caerus-event-card--soldout' : ''}`}
     >
-      {event.bannerUrl ? (
-        <img
-          className="caerus-event-card-banner"
-          src={event.bannerUrl}
-          alt=""
-          loading="lazy"
-        />
-      ) : (
-        <div className="caerus-event-card-banner-fallback" aria-hidden="true">
-          {initial}
-        </div>
-      )}
-
-      <h3 className="caerus-event-card-title">{event.title}</h3>
-
-      <div className="caerus-event-card-meta">
-        <span>{formatDateTime(event.startsAt)}</span>
-        <span className="caerus-event-card-sep" aria-hidden="true">·</span>
-        <span>{formatDuration(event.durationMinutes)}</span>
-        <span className="caerus-event-card-sep" aria-hidden="true">·</span>
-        <span>{event.auditorium}</span>
+      {/* Poster — bannerUrl is a 2:3 portrait poster, not a landscape banner. */}
+      <div className="caerus-event-card-poster">
+        {showImage ? (
+          <img
+            className="caerus-event-card-poster-img"
+            src={event.bannerUrl}
+            alt=""
+            loading="lazy"
+            onError={() => setImgFailed(true)}
+          />
+        ) : (
+          <span className="caerus-event-card-poster-letter" aria-hidden="true">
+            {initial}
+          </span>
+        )}
       </div>
 
-      {event.description && (
-        <p className="caerus-event-card-desc">{event.description}</p>
-      )}
-
+      {/* Decorative footer — orange base + three shapes; text rides above (z-index). */}
       <div className="caerus-event-card-footer">
-        <span className="caerus-event-card-price">{formatPrice(event.price)}</span>
-        <Availability
-          availableSeats={event.availableSeats}
-          totalSeats={event.totalSeats}
-        />
+        <span className="caerus-event-card-shape caerus-event-card-shape--teal" aria-hidden="true" />
+        <span className="caerus-event-card-shape caerus-event-card-shape--dark" aria-hidden="true" />
+        <span className="caerus-event-card-shape caerus-event-card-shape--square" aria-hidden="true" />
+
+        <div className="caerus-event-card-heading">
+          <h3 className="caerus-event-card-title">{event.title}</h3>
+          <p className="caerus-event-card-date">{formatDateTime(event.startsAt)}</p>
+        </div>
+        <p className="caerus-event-card-avail">
+          {availabilityText(event.availableSeats, event.totalSeats)}
+        </p>
       </div>
     </Link>
   );

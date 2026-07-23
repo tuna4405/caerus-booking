@@ -1,18 +1,21 @@
 /* Shared button — the single source of button styling. Never restyle per page;
-   pick a variant instead. See Button.jsx for the vocabulary. */
+   pick a variant instead. See Button.jsx for the vocabulary. Compact sizing
+   (var(--control-height)) is shared with inputs; variants set colour only. */
 
 .caerus-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  height: var(--control-height);
+  padding: 0 var(--btn-padding-x);
   font-family: var(--font-body);
-  font-size: var(--text-md);
-  font-weight: var(--weight-bold);
-  line-height: var(--leading-normal);
-  padding: var(--space-3) var(--space-5); /* generous — form-sized default */
+  font-size: var(--btn-font-size);
+  font-weight: var(--btn-font-weight);
+  line-height: 1;
+  white-space: nowrap;
   border: var(--border-width) solid transparent;
-  border-radius: var(--radius); /* 0 — square by design */
-  text-decoration: none; /* button-styled links must never underline */
+  border-radius: var(--radius);
+  text-decoration: none;
   cursor: pointer;
   transition:
     background var(--transition-fast),
@@ -28,7 +31,7 @@
   cursor: not-allowed;
 }
 
-/* filled yellow — shared by `action` (compact) and `primary` (form submit) */
+/* filled yellow — shared by `action` and `primary` */
 .caerus-button--action,
 .caerus-button--primary {
   background: var(--color-action);
@@ -39,10 +42,6 @@
 .caerus-button--primary:not(:disabled):hover {
   background: var(--color-action-dark);
   border-color: var(--color-action-dark);
-}
-/* action is the compact, header-height filled button */
-.caerus-button--action {
-  padding: var(--space-2) var(--space-5);
 }
 
 /* outlined blue-teal — inverts (fills) on hover */
@@ -62,8 +61,6 @@
   background: transparent;
   color: var(--color-text);
   border-color: transparent;
-  font-weight: var(--weight-medium);
-  padding: var(--space-2) var(--space-3);
 }
 .caerus-button--quiet:not(:disabled):hover {
   color: var(--color-secondary);
