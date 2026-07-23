@@ -95,7 +95,7 @@ CREATE INDEX idx_events_starts_at ON events (starts_at);
 | Column | Notes |
 |---|---|
 | `price` | Price per seat in VND. `totalPrice` on a booking = `price × seat count`, computed and stored at booking time (see §3.4). |
-| `banner_url` | Nullable — an event exists before its banner is uploaded. Set by `POST /events/:id/banner` after the S3 upload succeeds. |
+| `banner_url` | Holds the event's **poster** image URL (portrait, 2:3 — e.g. 400×600). Nullable — an event exists before its image is uploaded. Set by `POST /events/:id/banner` after the S3 upload succeeds. The name is historical: it's a poster, not a landscape banner. |
 | `idx_events_starts_at` | Supports `GET /events?date=...` filtering and the default "upcoming, soonest first" ordering. |
 
 The API fields `totalSeats` and `availableSeats` are **not columns** — they are computed from the `seats` table at query time (see §6.1). Storing counters invites drift; counting rows is trivially cheap at this scale (60 seats/event).
@@ -393,3 +393,4 @@ Where DynamoDB *does* fit (the optional layer from the architecture doc): "recen
 |---|---|---|
 | 2026-07-16 | Initial version — 5 tables, fixed 6×10 seat layout, TEXT+CHECK enums, booking & cancellation transactions defined | Tai ☐ Tuan ☐ |
 | 2026-07-16 | ERD moved out of the doc into standalone `erd.png` (matches the architecture diagram's visual style); §1.1 now embeds the image + cardinality table | Tai ☐ Tuan ☐ |
+| 2026-07-23 | `banner_url` documented as the event's portrait 2:3 **poster** URL (not a landscape banner); column name and type unchanged (§3.2) | Tai ☐ Tuan ☐ |

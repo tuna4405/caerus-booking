@@ -61,9 +61,9 @@
       across the footer and leaves ORANGE visible in the top-right. Title + date
       sit on this. */
 .caerus-event-card-shape--teal {
-  width: calc(var(--card-footer-height) * 2.4);
-  height: calc(var(--card-footer-height) * 2.4);
-  left: calc(var(--card-footer-height) * -1.1);
+  width: calc(var(--card-footer-height) * 2.5);
+  height: calc(var(--card-footer-height) * 2.5);
+  left: calc(var(--card-footer-height) * -0.74);
   top: calc(var(--card-footer-height) * -0.2);
   border-radius: 50%;
   background: var(--color-data);
@@ -71,10 +71,10 @@
 /* 2) dark circle — bottom-right, overflowing both edges; only its upper-left
       quadrant shows (~right 40% of the footer). Availability text sits on this. */
 .caerus-event-card-shape--dark {
-  width: calc(var(--card-footer-height) * 1.1);
-  height: calc(var(--card-footer-height) * 1.1);
-  right: calc(var(--card-footer-height) * -0.25);
-  bottom: calc(var(--card-footer-height) * -0.3);
+  width: calc(var(--card-footer-height) * 2.5);
+  height: calc(var(--card-footer-height) * 2.5);
+  right: calc(var(--card-footer-height) * -0.9);
+  bottom: calc(var(--card-footer-height) * -1.9);
   border-radius: 50%;
   background: var(--color-secondary);
 }
@@ -83,10 +83,10 @@
 .caerus-event-card-shape--square {
   width: calc(var(--card-footer-height) * 0.4);
   height: calc(var(--card-footer-height) * 0.4);
-  left: calc(var(--card-footer-height) * -0.05);
-  bottom: calc(var(--card-footer-height) * -0.1);
+  left: calc(var(--card-footer-height) * 0.05);
+  bottom: calc(var(--card-footer-height) * -0.27);
   background: var(--color-action);
-  transform: rotate(25deg);
+  transform: rotate(-15deg);
 }
 
 /* Footer text — above every shape. */

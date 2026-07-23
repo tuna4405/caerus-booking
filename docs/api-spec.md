@@ -174,6 +174,8 @@ List upcoming events. Public, no auth.
 }
 ```
 
+**Note on `bannerUrl`:** the URL of the event's **poster** — a portrait image at a 2:3 aspect ratio (e.g. 400×600), rendered as the poster on event cards and the event detail page. The field name is historical (it holds a poster, not a landscape banner). It remains **nullable**, since an event exists before its image is uploaded.
+
 #### GET /events/:id
 
 One event's details. Public. Same object shape as one item in the list above.
@@ -203,6 +205,8 @@ Admin creates an event.
 #### POST /events/:id/banner 🔒👑
 
 Admin uploads a banner image. `Content-Type: multipart/form-data`, field name `image` (jpg/png, max 5 MB). Backend stores it in the S3 images bucket.
+
+The image should be a **portrait 2:3 poster** (e.g. 400×600; jpg/png, max 5 MB as above). Images with a materially different aspect ratio are centre-cropped to 2:3 by the frontend, so a landscape upload will have its sides cut off. Server-side aspect-ratio validation is **optional polish** for the AWS phase when this endpoint is built — a suggestion, not a committed requirement.
 
 - `200 OK` → `{ "bannerUrl": "https://..." }`
 - `400` `VALIDATION_ERROR` (wrong type / too big), `401`, `403`, `404`
@@ -370,3 +374,4 @@ The S3-hosted frontend and the EC2 API live on different origins, so the browser
 | 2026-07-15 | Initial version | Tai ☐ Tuan ☐ |
 | 2026-07-15 | Confirmed max 6 seats per booking; removed 1-hour cancellation cutoff — bookings now cancellable any time before showtime | Tai ☐ Tuan ☐ |
 | 2026-07-23 | Timestamps now represent showtimes in the cinema timezone `Asia/Ho_Chi_Minh` (UTC+7): wire format stays UTC, but `GET /events?date` filters by the Vietnam calendar date and clients display times in UTC+7 (§2.2, §3.2) | Tai ☐ Tuan ☐ |
+| 2026-07-23 | `bannerUrl` documented as a portrait 2:3 **poster** rather than a landscape banner — one image per event, field name unchanged (§3.2) | Tai ☐ Tuan ☐ |
