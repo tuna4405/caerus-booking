@@ -1,0 +1,5 @@
+/* Timezone tag beside a prominent showtime. */
+.caerus-tz-note {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}

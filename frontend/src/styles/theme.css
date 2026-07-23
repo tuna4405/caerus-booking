@@ -149,6 +149,7 @@
   --container-pad:  var(--space-5);
   --header-height:  72px;
   --logo-height:    32px;     /* navbar logo image height (width auto) */
+  --card-min-width: 280px;    /* event grid: min column width before wrapping */
 
   /* --- Motion --------------------------------------------------------------- */
 

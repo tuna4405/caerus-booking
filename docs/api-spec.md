@@ -35,6 +35,7 @@ All endpoint paths below are relative to the base URL.
 
 - All request and response bodies are **JSON** (`Content-Type: application/json`).
 - All timestamps are **ISO 8601 UTC**, e.g. `"2026-07-20T13:30:00Z"`.
+- Timestamps are **transmitted in UTC** (the `Z` above) but **represent showtimes in the cinema's timezone, `Asia/Ho_Chi_Minh` (UTC+7)**. Storage and the wire format stay UTC; only interpretation and display convert to local time. Clients should render times in UTC+7, not the viewer's browser zone. Consequently the `?date` query parameter on `GET /events` is interpreted as a **Vietnam calendar date** (UTC+7), not a UTC date — see §3.2.
 - All IDs are integers (PostgreSQL `SERIAL`). Keep it simple; UUIDs are optional polish later.
 - All prices are integers in **VND** (no decimals), e.g. `90000` = 90,000₫.
 
@@ -148,7 +149,7 @@ List upcoming events. Public, no auth.
 
 | Param | Type | Example | Meaning |
 |---|---|---|---|
-| `date` | string | `2026-07-25` | Only events on this date |
+| `date` | string | `2026-07-25` | Only events on this date, interpreted as a **Vietnam calendar date** (`Asia/Ho_Chi_Minh`, UTC+7) — not a UTC date (see §2.2) |
 | `page` | int | `1` | Page number, default 1 |
 | `limit` | int | `20` | Page size, default 20, max 50 |
 
@@ -368,3 +369,4 @@ The S3-hosted frontend and the EC2 API live on different origins, so the browser
 |---|---|---|
 | 2026-07-15 | Initial version | Tai ☐ Tuan ☐ |
 | 2026-07-15 | Confirmed max 6 seats per booking; removed 1-hour cancellation cutoff — bookings now cancellable any time before showtime | Tai ☐ Tuan ☐ |
+| 2026-07-23 | Timestamps now represent showtimes in the cinema timezone `Asia/Ho_Chi_Minh` (UTC+7): wire format stays UTC, but `GET /events?date` filters by the Vietnam calendar date and clients display times in UTC+7 (§2.2, §3.2) | Tai ☐ Tuan ☐ |

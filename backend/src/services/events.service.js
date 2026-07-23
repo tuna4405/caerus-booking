@@ -7,6 +7,7 @@
 
 const pool = require('../config/db');
 const { ValidationError, NotFoundError } = require('../lib/errors');
+const { CINEMA_TIMEZONE } = require('../config/timezone');
 
 // Shared SELECT: an event plus its computed seat counts (schema doc §6.1).
 // Each caller appends its own WHERE / GROUP BY / ORDER / LIMIT.
@@ -78,11 +79,21 @@ async function listEvents({ date, page, limit }) {
   const dateFilter = normalizeDate(date);
 
   // Shared WHERE: upcoming events only, plus the optional date filter.
+  // The date filter matches the cinema's LOCAL calendar date, expressed as a
+  // half-open UTC range [localMidnight, nextLocalMidnight). starts_at is left
+  // unwrapped (no function around the column) so idx_events_starts_at can still
+  // serve the range scan — see schema doc §6.1.
   const conditions = ['e.starts_at >= now()'];
   const whereParams = [];
   if (dateFilter) {
     whereParams.push(dateFilter);
-    conditions.push(`(e.starts_at AT TIME ZONE 'UTC')::date = $${whereParams.length}::date`);
+    const dateParam = `$${whereParams.length}`;
+    whereParams.push(CINEMA_TIMEZONE);
+    const tzParam = `$${whereParams.length}`;
+    conditions.push(
+      `(e.starts_at >= (${dateParam}::date)::timestamp AT TIME ZONE ${tzParam}` +
+        ` AND e.starts_at < ((${dateParam}::date) + 1)::timestamp AT TIME ZONE ${tzParam})`
+    );
   }
   const whereClause = `WHERE ${conditions.join(' AND ')}`;
 

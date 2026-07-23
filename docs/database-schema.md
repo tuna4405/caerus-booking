@@ -272,13 +272,18 @@ SELECT e.*,
 FROM events e
 LEFT JOIN seats s ON s.event_id = e.id
 WHERE e.starts_at >= now()
-  AND ($date::date IS NULL OR (e.starts_at AT TIME ZONE 'UTC')::date = $date)
+  AND ($date::date IS NULL OR (
+        e.starts_at >= ($date::date)::timestamp AT TIME ZONE $tz
+    AND e.starts_at <  (($date::date) + 1)::timestamp AT TIME ZONE $tz
+  ))
 GROUP BY e.id
 ORDER BY e.starts_at
 LIMIT $limit OFFSET $offset;
 ```
 
 (Plus a matching `COUNT(*)` over the same `WHERE` for the `pagination` object.)
+
+`$date` is a **Vietnam calendar date** and `$tz` is the cinema timezone (`Asia/Ho_Chi_Minh`, from `CINEMA_TIMEZONE`). The filter is written as a half-open UTC range `[localMidnight, nextLocalMidnight)` rather than `(e.starts_at AT TIME ZONE 'x')::date = $date`: wrapping the column in a function would prevent `idx_events_starts_at` from serving the scan. Leaving `starts_at` bare keeps the predicate **sargable** so the index still applies.
 
 ### 6.2 `GET /events/:id/seats` — the seat map
 
