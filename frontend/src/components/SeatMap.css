@@ -1,0 +1,103 @@
+.caerus-seatmap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0; /* allow the grid below to shrink + scroll instead of overflowing */
+}
+
+/* SCREEN indicator — a full-width bar orienting the map (row A faces the screen). */
+.caerus-seatmap-screen {
+  padding: var(--space-2);
+  text-align: center;
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-muted);
+  background: var(--color-surface-alt);
+  border-radius: var(--radius);
+}
+
+/* Grid — scrolls horizontally on very narrow screens rather than overflowing the page. */
+.caerus-seatmap-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--seat-gap);
+  min-width: 0; /* flex item: shrink below content width so overflow-x can scroll */
+  overflow-x: auto;
+  padding-bottom: var(--space-1);
+}
+.caerus-seatmap-row {
+  display: flex;
+  align-items: center;
+  gap: var(--seat-gap);
+  width: max-content; /* natural width so the grid can scroll instead of squishing */
+}
+.caerus-seatmap-rowlabel {
+  width: var(--space-4);
+  flex: none;
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Seat button — sizing here; colour comes from the state modifier. */
+.caerus-seat {
+  width: var(--seat-size);
+  height: var(--seat-size);
+  flex: none;
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  border: var(--border-hairline) solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.caerus-seat:disabled {
+  cursor: not-allowed;
+}
+
+.caerus-seat--available {
+  background: var(--seat-available-bg);
+  border-color: var(--seat-available-border);
+  color: var(--seat-available-text);
+}
+.caerus-seat--selected {
+  background: var(--seat-selected-bg);
+  border-color: var(--seat-selected-border);
+  color: var(--seat-selected-text);
+}
+.caerus-seat--booked {
+  background: var(--seat-booked-bg);
+  border-color: var(--seat-booked-border);
+  color: var(--seat-booked-text);
+}
+.caerus-seat--conflict {
+  background: var(--seat-conflict-bg);
+  border-color: var(--seat-conflict-border);
+  color: var(--seat-conflict-text);
+}
+
+/* Legend */
+.caerus-seatmap-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.caerus-seatmap-legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.caerus-seat-swatch {
+  display: inline-block;
+  width: var(--space-4);
+  height: var(--space-4);
+  border: var(--border-hairline) solid transparent;
+  border-radius: var(--radius);
+}

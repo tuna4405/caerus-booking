@@ -1,0 +1,141 @@
+.caerus-confirm {
+  padding-block: var(--space-6);
+}
+
+/* Single summary card. */
+.caerus-confirm-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: var(--container-medium);
+  padding: var(--space-5);
+  background: var(--color-bg);
+  border: var(--border-hairline) solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+.caerus-confirm-title {
+  margin: 0;
+}
+
+/* Event row: small poster thumbnail beside title + meta. */
+.caerus-confirm-event {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+.caerus-confirm-poster {
+  width: var(--space-8); /* 64px thumbnail; height follows the 2:3 aspect ratio */
+  flex: none;
+  border-radius: var(--radius-card);
+}
+.caerus-confirm-event-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.caerus-confirm-event-title {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+.caerus-confirm-event-meta {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+.caerus-confirm-event-aud {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Seats + price breakdown (right-aligned values). */
+.caerus-confirm-rows {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.caerus-confirm-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.caerus-confirm-row dt {
+  color: var(--color-text-muted);
+}
+.caerus-confirm-row dd {
+  margin: 0;
+  text-align: right;
+}
+.caerus-confirm-row--total {
+  padding-top: var(--space-3);
+  border-top: var(--border-hairline) solid var(--color-border);
+}
+.caerus-confirm-row--total dt {
+  color: var(--color-text);
+  font-weight: var(--weight-bold);
+}
+.caerus-confirm-total-value {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+}
+
+/* Inline error (generic / retryable submit failure). */
+.caerus-confirm-error {
+  margin: 0;
+  color: var(--color-danger);
+  font-weight: var(--weight-medium);
+}
+
+/* Actions — stack if they don't fit. */
+.caerus-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Terminal message views (invalid / gone / not bookable / load error). */
+.caerus-confirm-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding-block: var(--space-7);
+}
+.caerus-confirm-message p {
+  margin: 0;
+}
+
+/* Skeleton */
+.caerus-confirm-skel-poster {
+  width: var(--space-8);
+  aspect-ratio: 2 / 3;
+  flex: none;
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-card);
+}
+.caerus-confirm-skel-lines {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.caerus-confirm-skel-line {
+  height: var(--space-4);
+  background: var(--color-surface-alt);
+  border-radius: var(--radius);
+}
+.caerus-confirm-skel-line--title {
+  height: var(--space-6);
+  width: 60%;
+}
+.caerus-confirm-skel-line--short {
+  width: 40%;
+}

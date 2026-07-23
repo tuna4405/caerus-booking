@@ -1,6 +1,6 @@
 // Route: /login — POST /auth/login via AuthContext#login
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { ApiError } from '../api/client';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -21,6 +21,7 @@ function messageFor(err) {
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -34,7 +35,9 @@ export default function Login() {
     setSubmitting(true);
     try {
       await login(email, password);
-      navigate('/');
+      // Return to wherever the user was headed before login, else Home.
+      const from = location.state?.from ?? '/';
+      navigate(from, { replace: true });
     } catch (err) {
       setError(messageFor(err));
     } finally {

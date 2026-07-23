@@ -1,10 +1,10 @@
 // Props: { event } — shape from GET /events (docs/api-spec.md §3.2).
 // Portrait card: a 2:3 poster over a decorative info footer (docs/design/event-card.png).
 // Only title, date+time, and availability appear here — price lives on the detail page.
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { formatDateTime } from '../utils/format';
+import Poster from './ui/Poster.jsx';
 import './EventCard.css';
 
 function availabilityText(availableSeats, totalSeats) {
@@ -14,13 +14,7 @@ function availabilityText(availableSeats, totalSeats) {
 }
 
 export default function EventCard({ event }) {
-  // Fall back to the letter placeholder if the poster URL fails to load
-  // (bad S3 URL, missing object, wrong bucket policy) — no broken-image icon.
-  const [imgFailed, setImgFailed] = useState(false);
-
   const soldOut = event.availableSeats === 0;
-  const initial = (event.title?.trim()?.[0] ?? '?').toUpperCase();
-  const showImage = Boolean(event.bannerUrl) && !imgFailed;
 
   return (
     <Link
@@ -28,21 +22,7 @@ export default function EventCard({ event }) {
       className={`caerus-event-card${soldOut ? ' caerus-event-card--soldout' : ''}`}
     >
       {/* Poster — bannerUrl is a 2:3 portrait poster, not a landscape banner. */}
-      <div className="caerus-event-card-poster">
-        {showImage ? (
-          <img
-            className="caerus-event-card-poster-img"
-            src={event.bannerUrl}
-            alt=""
-            loading="lazy"
-            onError={() => setImgFailed(true)}
-          />
-        ) : (
-          <span className="caerus-event-card-poster-letter" aria-hidden="true">
-            {initial}
-          </span>
-        )}
-      </div>
+      <Poster src={event.bannerUrl} title={event.title} />
 
       {/* Decorative footer — orange base + three shapes; text rides above (z-index). */}
       <div className="caerus-event-card-footer">

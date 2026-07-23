@@ -1,0 +1,200 @@
+.caerus-detail {
+  padding-block: var(--space-6);
+}
+
+/* Two columns; stack below 900px. */
+.caerus-detail-columns {
+  display: flex;
+  gap: var(--space-6);
+  align-items: flex-start;
+}
+.caerus-detail-poster-col {
+  flex: none;
+  width: var(--card-width);
+  max-width: 100%;
+}
+.caerus-detail-poster {
+  border-radius: var(--radius-card);
+}
+.caerus-detail-main {
+  flex: 1 1 auto;
+  min-width: 0; /* let the seat grid scroll instead of overflowing the page */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Header ---------------------------------------------------------------- */
+.caerus-detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.caerus-detail-meta {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+.caerus-detail-sep {
+  color: var(--color-text-muted);
+}
+.caerus-detail-price {
+  margin: 0;
+}
+.caerus-detail-price-value {
+  font-weight: var(--weight-bold);
+}
+.caerus-detail-price-label {
+  color: var(--color-text-muted);
+}
+.caerus-detail-desc {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+/* Banners (sold out / past) --------------------------------------------- */
+.caerus-detail-banner {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius);
+}
+
+/* Conflict warning ------------------------------------------------------- */
+.caerus-detail-conflict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-danger-bg);
+  border: var(--border-hairline) solid var(--color-danger);
+  border-radius: var(--radius);
+}
+.caerus-detail-conflict-msg {
+  margin: 0;
+  flex: 1 1 12rem;
+  color: var(--color-danger);
+  font-weight: var(--weight-medium);
+}
+
+/* Seat map section ------------------------------------------------------- */
+.caerus-detail-mapsection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0; /* let the seat grid scroll rather than widen the page */
+}
+.caerus-detail-maphead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* Selection summary + Continue ------------------------------------------ */
+.caerus-detail-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-hairline) solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+.caerus-detail-limit {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+.caerus-detail-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.caerus-detail-summary-info {
+  min-width: 0;
+}
+.caerus-detail-selected {
+  margin: 0;
+  font-weight: var(--weight-medium);
+}
+.caerus-detail-count {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.caerus-detail-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.caerus-detail-total-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.caerus-detail-total-value {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+}
+
+/* Error / not-found state ----------------------------------------------- */
+.caerus-detail-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding-block: var(--space-7);
+}
+.caerus-detail-state p {
+  margin: 0;
+}
+
+/* Skeleton --------------------------------------------------------------- */
+.caerus-detail-skel-poster {
+  aspect-ratio: 2 / 3;
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-card);
+}
+.caerus-detail-skel-line {
+  height: var(--space-4);
+  background: var(--color-surface-alt);
+  border-radius: var(--radius);
+}
+.caerus-detail-skel-line--title {
+  height: var(--space-6);
+  width: 60%;
+}
+.caerus-detail-skel-line--short {
+  width: 40%;
+}
+.caerus-detail-skel-seat {
+  width: var(--seat-size);
+  height: var(--seat-size);
+  flex: none;
+  background: var(--color-surface-alt);
+  border-radius: var(--radius);
+}
+
+/* Stack + stick the summary to the bottom on narrow screens. */
+@media (max-width: 900px) {
+  .caerus-detail-columns {
+    flex-direction: column;
+    align-items: stretch; /* full-width children when stacked (else content sets width) */
+  }
+  .caerus-detail-summary {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    box-shadow: var(--shadow-overlay);
+  }
+}
