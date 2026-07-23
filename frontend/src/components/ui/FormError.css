@@ -1,0 +1,12 @@
+/* Form-level error banner. */
+
+.caerus-formerror {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  border: var(--border-width) solid var(--color-danger);
+  border-radius: var(--radius); /* 0 — square by design */
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}

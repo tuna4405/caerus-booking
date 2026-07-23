@@ -1,0 +1,8 @@
+<!-- PLACEHOLDER LOGO — replace this file with the real Caerus brand mark.
+     Swapping this single file updates the navbar; no JSX changes are needed.
+     Hex mirrors theme tokens: #EE964B = --color-accent, #1F271B = --color-ink. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" fill="#EE964B"/>
+  <text x="16" y="17" font-family="Roboto, sans-serif" font-size="20" font-weight="700"
+        fill="#1F271B" text-anchor="middle" dominant-baseline="central">C</text>
+</svg>

@@ -1,0 +1,95 @@
+/* Full-bleed header with a hairline bottom edge; the container inside aligns the
+   logo with page content. Three zones on one row: left / center / right. */
+
+.caerus-navbar {
+  background: var(--color-bg);
+  border-bottom: var(--border-hairline) solid var(--color-border);
+}
+
+.caerus-navbar-row {
+  display: flex;
+  align-items: stretch; /* zones fill row height so the active underline sits flush */
+  gap: var(--space-5);
+  min-height: var(--header-height);
+}
+
+/* LEFT ------------------------------------------------------------------ */
+.caerus-navbar-left {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+.caerus-navbar-logo-link {
+  display: inline-flex;
+  align-items: center;
+}
+.caerus-navbar-logo-link:hover {
+  text-decoration: none;
+}
+
+/* CENTER — takes the remaining space and centers its own contents --------- */
+.caerus-navbar-center {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--space-5);
+}
+.caerus-navbar-link {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  color: var(--color-text);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  /* transparent reserve so activating never shifts layout; because the link
+     fills the row height, the active border lands on the header's bottom edge. */
+  border-bottom: var(--border-width) solid transparent;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+.caerus-navbar-link:hover {
+  color: var(--color-secondary);
+  text-decoration: none;
+}
+.caerus-navbar-link.active {
+  color: var(--color-secondary);
+  border-bottom-color: var(--color-accent);
+}
+
+/* RIGHT ----------------------------------------------------------------- */
+.caerus-navbar-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  flex: 0 0 auto;
+  margin-left: auto; /* pin to the far edge when the center wraps away (mobile) */
+}
+.caerus-navbar-user {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+/* RESPONSIVE ------------------------------------------------------------ */
+/* Below 720px: logo (left) and auth actions (right) stay on row one; the nav
+   links drop to a full-width second row, left-aligned and horizontally
+   scrollable if they overflow. No hamburger — out of scope. */
+@media (max-width: 720px) {
+  .caerus-navbar-row {
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: var(--space-2);
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+  .caerus-navbar-left  { order: 1; }
+  .caerus-navbar-right { order: 2; }
+  .caerus-navbar-center {
+    order: 3;
+    flex: 1 0 100%;          /* full-width second row */
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;        /* scroll instead of overflowing the viewport */
+  }
+}

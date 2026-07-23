@@ -1,0 +1,29 @@
+/* Centered single-column auth screen — mirrors Login. */
+
+.caerus-register {
+  max-width: var(--container-narrow);
+  margin: var(--space-8) auto;
+  padding: 0 var(--container-pad);
+}
+
+.caerus-register-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.caerus-register-title {
+  margin: 0;
+}
+
+.caerus-register-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.caerus-register-alt {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}

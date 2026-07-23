@@ -1,0 +1,70 @@
+/* Shared button — the single source of button styling. Never restyle per page;
+   pick a variant instead. See Button.jsx for the vocabulary. */
+
+.caerus-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-normal);
+  padding: var(--space-3) var(--space-5); /* generous — form-sized default */
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius); /* 0 — square by design */
+  text-decoration: none; /* button-styled links must never underline */
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+.caerus-button:hover {
+  text-decoration: none; /* beat the global a:hover underline for link buttons */
+}
+
+.caerus-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* filled yellow — shared by `action` (compact) and `primary` (form submit) */
+.caerus-button--action,
+.caerus-button--primary {
+  background: var(--color-action);
+  color: var(--color-text-on-action);
+  border-color: var(--color-action);
+}
+.caerus-button--action:not(:disabled):hover,
+.caerus-button--primary:not(:disabled):hover {
+  background: var(--color-action-dark);
+  border-color: var(--color-action-dark);
+}
+/* action is the compact, header-height filled button */
+.caerus-button--action {
+  padding: var(--space-2) var(--space-5);
+}
+
+/* outlined blue-teal — inverts (fills) on hover */
+.caerus-button--secondary {
+  background: transparent;
+  color: var(--color-secondary);
+  border-color: var(--color-secondary);
+}
+.caerus-button--secondary:not(:disabled):hover {
+  background: var(--color-secondary);
+  color: var(--color-text-invert);
+  border-color: var(--color-secondary);
+}
+
+/* quiet — text-only action, no border or background */
+.caerus-button--quiet {
+  background: transparent;
+  color: var(--color-text);
+  border-color: transparent;
+  font-weight: var(--weight-medium);
+  padding: var(--space-2) var(--space-3);
+}
+.caerus-button--quiet:not(:disabled):hover {
+  color: var(--color-secondary);
+}

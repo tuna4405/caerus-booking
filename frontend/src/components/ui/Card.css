@@ -1,0 +1,8 @@
+/* Surface panel — flat, hairline border, barely-softened corners per the mockup. */
+
+.caerus-card {
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: var(--space-6);
+}

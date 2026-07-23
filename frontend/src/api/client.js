@@ -1,64 +1,104 @@
-// The ONE file that changes on integration day — every fetch call lives
-// here. Base URL comes from VITE_API_BASE_URL (see .env.example); until
-// the backend is reachable, callers should fall back to src/mocks/*.json.
+// src/api/client.js — the single place the frontend knows about the API.
+// Calls the LIVE Express API (see .env: VITE_API_BASE_URL). No mocks:
+// the backend is built, so every screen talks to the real thing.
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const TOKEN_KEY = 'caerus_token';
 
-async function request(path, options = {}) {
-  const token = localStorage.getItem('token');
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+export function setToken(token) {
+  if (token) localStorage.setItem(TOKEN_KEY, token);
+  else localStorage.removeItem(TOKEN_KEY);
+}
 
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  });
+// Every failure throws this. Screens switch on `code` (never on `message`),
+// per api-spec §2.4.
+export class ApiError extends Error {
+  constructor(status, code, message, extra = {}) {
+    super(message || code || 'Request failed');
+    this.name = 'ApiError';
+    this.status = status;
+    this.code = code;
+    Object.assign(this, extra); // carries conflictingSeatIds
+  }
+}
 
-  const data = await res.json().catch(() => ({}));
+async function request(method, path, { body, auth = false } = {}) {
+  const headers = {};
+  let payload;
 
-  if (!res.ok) {
-    // Shape from docs/api-spec.md §2.4: { error: { code, message } }
-    const err = new Error(data?.error?.message || 'Request failed');
-    err.code = data?.error?.code;
-    throw err;
+  if (body instanceof FormData) {
+    payload = body; // let the browser set the multipart boundary
+  } else if (body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+    payload = JSON.stringify(body);
   }
 
+  if (auth) {
+    const token = getToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${BASE_URL}${path}`, { method, headers, body: payload });
+
+  if (res.status === 204) return null; // cancel booking returns no body
+
+  let data = null;
+  const text = await res.text();
+  if (text) {
+    try { data = JSON.parse(text); } catch { /* leave null */ }
+  }
+
+  if (!res.ok) {
+    const { code, message, ...extra } = data?.error ?? {};
+    throw new ApiError(res.status, code, message, extra);
+  }
   return data;
 }
 
-// TODO: implement each call below, then fall back to the matching
-// mocks/*.json while the backend endpoint isn't ready yet.
-
-export async function login(email, password) {
-  throw new Error('api/client#login not implemented yet');
+// ---- Auth (api-spec §3.1) ----
+export function login(email, password) {
+  return request('POST', '/auth/login', { body: { email, password } });
+}
+export function register(name, email, password) {
+  return request('POST', '/auth/register', { body: { name, email, password } });
 }
 
-export async function register(name, email, password) {
-  throw new Error('api/client#register not implemented yet');
+// ---- Events (§3.2) ----
+export function getEvents(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v !== undefined && v !== '')
+  ).toString();
+  return request('GET', `/events${qs ? `?${qs}` : ''}`);
+}
+export function getEventById(id) {
+  return request('GET', `/events/${id}`);
+}
+export function createEvent(event) {
+  return request('POST', '/events', { body: event, auth: true });
 }
 
-export async function getEvents(params) {
-  throw new Error('api/client#getEvents not implemented yet');
+// ---- Seats (§3.3) ----
+export function getSeatMap(eventId) {
+  return request('GET', `/events/${eventId}/seats`);
 }
 
-export async function getEventById(id) {
-  throw new Error('api/client#getEventById not implemented yet');
+// ---- Bookings (§3.4) ----
+export function createBooking(eventId, seatIds) {
+  return request('POST', '/bookings', { body: { eventId, seatIds }, auth: true });
+}
+export function getMyBookings() {
+  return request('GET', '/bookings', { auth: true });
+}
+export function getBookingById(id) {
+  return request('GET', `/bookings/${id}`, { auth: true });
+}
+export function cancelBooking(bookingId) {
+  return request('DELETE', `/bookings/${bookingId}`, { auth: true });
 }
 
-export async function getSeatMap(eventId) {
-  throw new Error('api/client#getSeatMap not implemented yet');
-}
-
-export async function createBooking(eventId, seatIds) {
-  throw new Error('api/client#createBooking not implemented yet');
-}
-
-export async function getMyBookings() {
-  throw new Error('api/client#getMyBookings not implemented yet');
-}
-
-export async function cancelBooking(bookingId) {
-  throw new Error('api/client#cancelBooking not implemented yet');
-}
+// NOT BUILT ON THE BACKEND YET — needs S3 / Lambda. Screens stub these.
+// export function uploadBanner(eventId, file) { ... }
+// export function generateTicket(bookingId) { ... }

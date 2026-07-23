@@ -1,0 +1,5 @@
+/* Fixed height, width follows the asset's aspect ratio. */
+.caerus-logo {
+  height: var(--logo-height);
+  width: auto;
+}

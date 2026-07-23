@@ -1,5 +1,9 @@
-// Route: / — GET /events, falls back to mocks/events.json
+// Route: / — GET /events. Real listing comes next; plain stub for now.
+// Uses .caerus-container so its left edge lines up with the navbar logo.
 export default function EventList() {
-  // TODO: fetch events via api/client.js, render <EventCard> per event
-  return <h1>Event List — TODO</h1>;
+  return (
+    <main className="caerus-container">
+      <h1>EventList</h1>
+    </main>
+  );
 }

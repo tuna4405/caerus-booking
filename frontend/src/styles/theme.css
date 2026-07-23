@@ -1,0 +1,222 @@
+/* ==========================================================================
+   Caerus — design tokens
+   Single source of visual truth. Derived from the approved Figma mockup.
+
+   RULE: components use var(--token) only. Never hardcode a hex, font,
+   or pixel spacing value in a component stylesheet. If a value you need
+   isn't here, add it here first.
+
+   Requires Roboto — see index.html (<link> to Google Fonts).
+   ========================================================================== */
+
+:root {
+
+  /* --- Brand palette (given) --------------------------------------------
+     #1F271B  ink        dark near-black green — headings, dark surfaces
+     #EE964B  accent     orange — emphasis text, selected states
+     #F4D35E  action     yellow — filled primary buttons
+     #19647E  secondary  deep blue-teal — outlined buttons, links
+     #28AFB0  data       teal — stats, positive/confirmed status
+     --------------------------------------------------------------------- */
+
+  --color-ink:          #1F271B;
+  --color-accent:       #EE964B;
+  --color-accent-dark:  #D97C2E;  /* hover/active for accent */
+  --color-action:       #F4D35E;
+  --color-action-dark:  #E5BE3C;  /* hover/active for action */
+  --color-secondary:    #19647E;
+  --color-secondary-dark: #124C60; /* hover/active for secondary */
+  --color-data:         #28AFB0;
+
+  /* --- Neutrals (filled in to match the mockup) -------------------------- */
+
+  --color-bg:           #FFFFFF;  /* page background */
+  --color-surface:      #F7F7F6;  /* cards, panels — barely off-white */
+  --color-surface-alt:  #ECEDEB;  /* nested/inset panels */
+  --color-placeholder:  #D9D9D9;  /* image placeholder box in the mockup */
+  --color-border:       #D8DAD6;  /* hairline dividers, input borders */
+  --color-border-strong:#B4B8B2;  /* focused / emphasized borders */
+
+  /* --- Text -------------------------------------------------------------- */
+
+  --color-text:         #000000;  /* body copy — mockup uses true black */
+  --color-text-heading: #000000;  /* headings */
+  --color-text-muted:   #5C6360;  /* captions, labels, secondary info */
+  --color-text-invert:  #FFFFFF;  /* text on dark surfaces */
+  --color-text-on-action: #1F271B; /* black-ish text on the yellow button */
+
+  /* --- Status ------------------------------------------------------------
+     Danger is not in the given palette; this red is tuned to sit with the
+     warm accent rather than fight it. Success reuses the brand teal. */
+
+  --color-success:      #28AFB0;
+  --color-success-bg:   #E4F5F5;
+  --color-danger:       #C43D2E;
+  --color-danger-bg:    #FBEAE7;
+  --color-warning:      #EE964B;
+  --color-warning-bg:   #FDF0E4;
+
+  /* --- Seat map ----------------------------------------------------------
+     The one place where color carries meaning rather than style.
+     Four states, deliberately distinguishable by lightness as well as hue
+     so the map still reads for colour-blind users and in a grayscale
+     screenshot in the report.
+
+     conflict = seats returned in `conflictingSeatIds` on a 409
+     SEAT_ALREADY_BOOKED — flash these so the user sees what they lost. */
+
+  --seat-available-bg:     #FFFFFF;
+  --seat-available-border: #19647E;
+  --seat-available-text:   #19647E;
+
+  --seat-selected-bg:      #EE964B;
+  --seat-selected-border:  #D97C2E;
+  --seat-selected-text:    #1F271B;
+
+  --seat-booked-bg:        #D8DAD6;
+  --seat-booked-border:    #C4C7C2;
+  --seat-booked-text:      #8A8F8A;
+
+  --seat-conflict-bg:      #C43D2E;
+  --seat-conflict-border:  #A32F22;
+  --seat-conflict-text:    #FFFFFF;
+
+  --seat-size:             34px;
+  --seat-gap:              8px;
+
+  /* --- Booking status (maps to bookings.status in the schema) ------------ */
+
+  --status-confirmed-fg: #157F80;
+  --status-confirmed-bg: #E4F5F5;
+  --status-cancelled-fg: #8A8F8A;
+  --status-cancelled-bg: #ECEDEB;
+
+  /* --- Typography --------------------------------------------------------
+     Roboto throughout, per the mockup. Weight does the work, not family. */
+
+  --font-body:    'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-heading: var(--font-body);
+
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-bold:    700;
+  --weight-black:   900;
+
+  --text-xs:   0.75rem;   /* 12px — fine print */
+  --text-sm:   0.875rem;  /* 14px — labels, captions ("Showtimes") */
+  --text-md:   1rem;      /* 16px — body copy */
+  --text-lg:   1.25rem;   /* 20px — card titles */
+  --text-xl:   1.75rem;   /* 28px — section headings */
+  --text-2xl:  2.25rem;   /* 36px — page titles, stat numbers */
+  --text-hero: 3.5rem;    /* 56px — landing headline */
+
+  --leading-tight:  1.15;  /* headlines */
+  --leading-normal: 1.5;   /* body */
+  --tracking-tight: -0.02em; /* large headings only */
+
+  /* --- Spacing scale ------------------------------------------------------ */
+
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+
+  /* --- Shape --------------------------------------------------------------
+     The mockup is deliberately sharp-cornered. Keep it that way: rounded
+     corners are the fastest way to make this look like a different design. */
+
+  --radius:       0px;   /* buttons, inputs — square, per mockup */
+  --radius-card:  2px;   /* cards, panels — a hair of softening */
+
+  --border-width: 2px;    /* the Login button's outline weight, active nav underline */
+  --border-hairline: 1px; /* header / divider hairlines (only 2px existed before) */
+
+  /* --- Elevation ----------------------------------------------------------
+     The mockup is flat. Shadows are for overlays only (modals, dropdowns). */
+
+  --shadow-none:    none;
+  --shadow-overlay: 0 4px 16px rgb(31 39 27 / 0.14);
+
+  /* --- Layout -------------------------------------------------------------- */
+
+  --container-max:  1200px;
+  --container-narrow: 420px;  /* centered single-column forms (auth screens) */
+  --container-pad:  var(--space-5);
+  --header-height:  72px;
+  --logo-height:    32px;     /* navbar logo image height (width auto) */
+
+  /* --- Motion --------------------------------------------------------------- */
+
+  --transition-fast: 120ms ease;
+  --transition-base: 200ms ease;
+}
+
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-base: 0ms;
+  }
+}
+
+/* ==========================================================================
+   Base resets — minimal, just enough that pages start from a known state
+   ========================================================================== */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-family: var(--font-heading);
+  color: var(--color-text-heading);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+
+h1 { font-size: var(--text-2xl); letter-spacing: var(--tracking-tight); }
+h2 { font-size: var(--text-xl); }
+h3 { font-size: var(--text-lg); }
+
+a {
+  color: var(--color-secondary);
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+/* Visible keyboard focus everywhere — do not remove. */
+:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+img { max-width: 100%; display: block; }
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+/* Shared page gutter. The navbar row and page content both use it so their
+   left edges line up. */
+.caerus-container {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
