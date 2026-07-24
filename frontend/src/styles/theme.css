@@ -65,9 +65,9 @@
      conflict = seats returned in `conflictingSeatIds` on a 409
      SEAT_ALREADY_BOOKED — flash these so the user sees what they lost. */
 
-  --seat-available-bg:     #FFFFFF;
-  --seat-available-border: #19647E;
-  --seat-available-text:   #19647E;
+  --seat-available-bg:     #28AFB0;
+  --seat-available-border: #28AFB0;
+  --seat-available-text:   #000000;
 
   --seat-selected-bg:      #EE964B;
   --seat-selected-border:  #D97C2E;
@@ -81,8 +81,11 @@
   --seat-conflict-border:  #A32F22;
   --seat-conflict-text:    #FFFFFF;
 
-  --seat-size:             34px;
+  --seat-size:             30px;
   --seat-gap:              8px;
+  --screen-arc-height:     100px;   /* height of the SCREEN arc's SVG box */
+  --screen-overhang:       56px;   /* how far the arc extends past the grid, each side */
+  --screen-gap-below:      var(--space-5);
 
   /* --- Booking status (maps to bookings.status in the schema) ------------ */
 
@@ -113,7 +116,7 @@
   --leading-tight:  1.15;  /* headlines */
   --leading-normal: 1.5;   /* body */
   --tracking-tight: -0.02em; /* large headings only */
-  --tracking-wide:  0.2em;   /* letter-spaced labels (e.g. the seat-map SCREEN bar) */
+  --tracking-wide:  0.18em;  /* letter-spaced labels (the seat-map SCREEN bar) */
 
   /* --- Spacing scale ------------------------------------------------------ */
 

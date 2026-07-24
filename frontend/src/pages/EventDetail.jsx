@@ -230,12 +230,6 @@ export default function EventDetail() {
           )}
 
           <section className="caerus-detail-mapsection" aria-label="Seats">
-            <div className="caerus-detail-maphead">
-              <h2>Seats</h2>
-              {!hasConflicts && (
-                <Button variant="secondary" onClick={reload}>Refresh seat map</Button>
-              )}
-            </div>
             <SeatMap
               seats={seats}
               selectedIds={selectedIds}
@@ -253,10 +247,9 @@ export default function EventDetail() {
               <div className="caerus-detail-summary-row">
                 <div className="caerus-detail-summary-info">
                   <p className="caerus-detail-selected">
-                    {selectedLabels || 'No seats selected'}
-                  </p>
-                  <p className="caerus-detail-count">
-                    {selectedIds.length} {selectedIds.length === 1 ? 'seat' : 'seats'} selected
+                    {selectedIds.length === 0
+                      ? 'No seats selected'
+                      : `${selectedIds.length} ${selectedIds.length === 1 ? 'seat' : 'seats'} selected · ${selectedLabels}`}
                   </p>
                 </div>
                 <div className="caerus-detail-total">

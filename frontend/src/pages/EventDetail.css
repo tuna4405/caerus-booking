@@ -85,16 +85,7 @@
 
 /* Seat map section ------------------------------------------------------- */
 .caerus-detail-mapsection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
   min-width: 0; /* let the seat grid scroll rather than widen the page */
-}
-.caerus-detail-maphead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
 }
 
 /* Selection summary + Continue ------------------------------------------ */
@@ -126,11 +117,6 @@
 .caerus-detail-selected {
   margin: 0;
   font-weight: var(--weight-medium);
-}
-.caerus-detail-count {
-  margin: 0;
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
 }
 .caerus-detail-total {
   display: flex;

@@ -26,8 +26,10 @@
   text-decoration: none; /* beat the global a:hover underline for link buttons */
 }
 
-.caerus-button:disabled {
-  opacity: 0.6;
+/* Disabled reads as clearly non-interactive — applies to every variant. */
+.caerus-button:disabled,
+.caerus-button[disabled] {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 

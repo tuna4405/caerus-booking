@@ -45,8 +45,27 @@ export default function SeatMap({
 
   return (
     <div className="caerus-seatmap">
-      {/* Orients the user — row A is nearest the screen. */}
-      <div className="caerus-seatmap-screen" aria-hidden="true">SCREEN</div>
+      {/* Orients the user — row A is nearest the screen. A stroked SVG arc gives a
+          constant-thickness curved band (a filled shape would read as a dome). */}
+      <div className="caerus-seatmap-screen">
+        <span className="caerus-seatmap-screen-label">SCREEN</span>
+        <svg
+          className="caerus-seatmap-screen-arc"
+          viewBox="0 0 800 60"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            d="M 4 52 Q 400 -2 796 52"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="14"
+            strokeLinecap="butt"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      </div>
 
       <div className="caerus-seatmap-grid" role="group" aria-label="Seat map">
         {rows.map((r) => (

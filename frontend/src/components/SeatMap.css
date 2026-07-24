@@ -1,19 +1,48 @@
+/* The whole block (SCREEN + rows + legend) sizes to the grid and centres as a
+   unit; max-width keeps it from causing page-level overflow on narrow screens. */
 .caerus-seatmap {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
   min-width: 0; /* allow the grid below to shrink + scroll instead of overflowing */
 }
 
-/* SCREEN indicator — a full-width bar orienting the map (row A faces the screen). */
+/* SCREEN indicator — a constant-thickness curved BAND (a stroked SVG arc), wider
+   than the seat grid and overhanging equally on both sides. The label sits above
+   the arc's apex. currentColor drives the stroke, so it stays token-driven. */
 .caerus-seatmap-screen {
-  padding: var(--space-2);
-  text-align: center;
-  font-size: var(--text-sm);
-  letter-spacing: var(--tracking-wide);
+  /* Wider than the grid, still centred. The parent wrapper is width: fit-content,
+     so 100% here is the grid's width. contain: inline-size keeps the SVG's own
+     intrinsic width (viewBox ratio × height ≈ 693px) from inflating that wrapper —
+     without it the wrapper stretches to the full column and the band overflows. */
+  contain: inline-size;
+  width: calc(100% + var(--screen-overhang) * 2);
+  margin-left: calc(var(--screen-overhang) * -1);
+  margin-bottom: var(--screen-gap-below);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--color-surface-alt); /* drives the arc via currentColor */
+}
+.caerus-seatmap-screen-label {
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-tight);
   color: var(--color-text-muted);
-  background: var(--color-surface-alt);
-  border-radius: var(--radius);
+  margin-bottom: var(--space-1);
+}
+.caerus-seatmap-screen-arc {
+  display: block;
+  width: 100%;
+  height: var(--screen-arc-height);
+}
+
+/* The overhang can push past the viewport on narrow screens — shrink it so the arc
+   never causes page-level horizontal scrolling. */
+@media (max-width: 900px) {
+  .caerus-seatmap-screen { --screen-overhang: 24px; }
+}
+@media (max-width: 560px) {
+  .caerus-seatmap-screen { --screen-overhang: 0px; }
 }
 
 /* Grid — scrolls horizontally on very narrow screens rather than overflowing the page. */
@@ -22,9 +51,10 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--seat-gap);
-  min-width: 0; /* flex item: shrink below content width so overflow-x can scroll */
+  min-width: 0; /* shrink below content width so overflow-x can scroll */
   overflow-x: auto;
   padding-bottom: var(--space-1);
+  margin-bottom: var(--space-5);
 }
 .caerus-seatmap-row {
   display: flex;
@@ -78,13 +108,14 @@
   color: var(--seat-conflict-text);
 }
 
-/* Legend */
+/* Legend — centred under the grid, with a larger gap before the summary card. */
 .caerus-seatmap-legend {
   list-style: none;
-  margin: 0;
+  margin: 0 0 var(--space-7);
   padding: 0;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-3);
   font-size: var(--text-sm);
   color: var(--color-text-muted);
