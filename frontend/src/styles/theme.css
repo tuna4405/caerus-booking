@@ -167,6 +167,7 @@
   --card-width:     220px;      /* event card natural (max) width */
   --card-footer-height: 108px;  /* event card decorative footer height */
   --detail-left-width: 280px;   /* event detail: left column (poster + details) */
+  --seat-area-width: 800px;     /* event detail: bordered seat frame + summary (equal width, left-aligned) */
   --bookings-max-width: 760px;  /* My bookings: single-column list width */
   --booking-thumb-width: 64px;  /* My bookings: booking card poster thumbnail */
   --bookingdetail-max-width: 640px; /* Booking detail: single centred column */

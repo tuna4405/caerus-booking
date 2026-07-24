@@ -79,14 +79,33 @@
   font-weight: var(--weight-medium);
 }
 
-/* Seat map section ------------------------------------------------------- */
+/* Seat area frame — a bordered box around ONLY the arc + seat grid + legend
+   (the summary is a separate element below). max-width sets the frame's outer
+   width; the summary matches it via the same token so their edges line up. The
+   fit-content + margin-inline:auto that centres the seat block lives on
+   .caerus-seatmap INSIDE this frame, so the block centres within the padding. */
 .caerus-detail-mapsection {
+  width: 100%;
+  max-width: var(--seat-area-width);
   min-width: 0; /* let the seat grid scroll rather than widen the page */
+  margin-bottom: var(--space-6); /* gap to the summary when the column isn't stretched */
+  padding: var(--space-6);
+  background: var(--color-bg);
+  border: var(--border-hairline) solid var(--color-secondary);
+  border-radius: var(--radius-card);
+}
+/* Legend's own bottom margin would sit inside the frame and make the padding
+   bottom-heavy — the frame padding provides that space now. */
+.caerus-detail-mapsection .caerus-seatmap-legend {
+  margin-bottom: 0;
 }
 
 /* Selection summary + Continue ------------------------------------------ */
 .caerus-detail-summary {
   margin-top: auto; /* push to the bottom of the right column; seat map rides up */
+  width: 100%;
+  max-width: 580px; /* match the seat frame; left edges align */
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -177,7 +196,11 @@
   .caerus-eventdetail-right {
     min-height: 0; /* own content height once it's a row of its own */
   }
+  .caerus-detail-mapsection {
+    margin-inline: auto; /* centre the frame once it's a column of its own */
+  }
   .caerus-detail-summary {
+    max-width: none; /* full-width sticky action bar on narrow screens */
     position: sticky;
     bottom: 0;
     z-index: 5;
