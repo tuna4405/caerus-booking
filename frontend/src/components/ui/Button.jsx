@@ -4,6 +4,7 @@ import './Button.css';
 //   action    — filled yellow, compact (navbar / inline actions)
 //   primary   — filled yellow, generous padding (prominent form submits)
 //   secondary — outlined blue-teal, fills on hover
+//   danger    — filled red, for destructive actions (cancel booking)
 //   quiet     — text-only action (no border or background)
 //
 // Renders a <button> by default. Pass `as` (e.g. a react-router Link) for

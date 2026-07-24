@@ -58,6 +58,17 @@
   border-color: var(--color-secondary);
 }
 
+/* danger — filled red, for destructive actions (e.g. Cancel booking) */
+.caerus-button--danger {
+  background: var(--color-danger);
+  color: var(--color-text-invert);
+  border-color: var(--color-danger);
+}
+.caerus-button--danger:not(:disabled):hover {
+  background: var(--color-danger-dark);
+  border-color: var(--color-danger-dark);
+}
+
 /* quiet — text-only action, no border or background */
 .caerus-button--quiet {
   background: transparent;

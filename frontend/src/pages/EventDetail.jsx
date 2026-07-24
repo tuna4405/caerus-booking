@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { getEventById, getSeatMap, ApiError } from '../api/client';
-import { formatDateTime, formatDuration, formatPrice } from '../utils/format';
+import { formatDateTimeLong, formatDuration, formatPrice } from '../utils/format';
 import { useAuth } from '../context/AuthContext.jsx';
 import SeatMap from '../components/SeatMap.jsx';
 import Poster from '../components/ui/Poster.jsx';
@@ -26,14 +26,16 @@ function parseIds(raw) {
 function DetailSkeleton() {
   return (
     <main className="caerus-container caerus-detail" aria-busy="true">
-      <div className="caerus-detail-columns">
-        <div className="caerus-detail-poster-col">
+      <div className="caerus-eventdetail-layout">
+        <div className="caerus-eventdetail-left">
           <div className="caerus-detail-skel-poster" />
+          <div className="caerus-eventdetail-details">
+            <div className="caerus-detail-skel-line caerus-detail-skel-line--title" />
+            <div className="caerus-detail-skel-line caerus-detail-skel-line--short" />
+            <div className="caerus-detail-skel-line caerus-detail-skel-line--short" />
+          </div>
         </div>
-        <div className="caerus-detail-main">
-          <div className="caerus-detail-skel-line caerus-detail-skel-line--title" />
-          <div className="caerus-detail-skel-line" />
-          <div className="caerus-detail-skel-line caerus-detail-skel-line--short" />
+        <div className="caerus-eventdetail-right">
           <div className="caerus-seatmap-grid" aria-hidden="true">
             {Array.from({ length: 6 }).map((_, r) => (
               <div className="caerus-seatmap-row" key={r}>
@@ -184,35 +186,30 @@ export default function EventDetail() {
 
   return (
     <main className="caerus-container caerus-detail">
-      <div className="caerus-detail-columns">
-        <div className="caerus-detail-poster-col">
+      <div className="caerus-eventdetail-layout">
+        {/* LEFT: poster, then the event details stacked beneath it. */}
+        <div className="caerus-eventdetail-left">
           <Poster
             src={event.bannerUrl}
             title={event.title}
             className="caerus-detail-poster"
             loading="eager"
           />
-        </div>
-
-        <div className="caerus-detail-main">
-          <div className="caerus-detail-header">
+          <div className="caerus-eventdetail-details">
             <h1>{event.title}</h1>
-            <p className="caerus-detail-meta">
-              <span>{formatDateTime(event.startsAt)}</span>
-              <TimeZoneNote />
-              <span className="caerus-detail-sep" aria-hidden="true">·</span>
-              <span>{formatDuration(event.durationMinutes)}</span>
-              <span className="caerus-detail-sep" aria-hidden="true">·</span>
-              <span>{event.auditorium}</span>
+            <p className="caerus-eventdetail-line">
+              {formatDateTimeLong(event.startsAt)} <TimeZoneNote />
             </p>
-            <p className="caerus-detail-price">
-              <span className="caerus-detail-price-value">{formatPrice(event.price)}</span>
-            </p>
+            <p className="caerus-eventdetail-line">{formatDuration(event.durationMinutes)}</p>
+            <p className="caerus-eventdetail-line">{event.auditorium}</p>
             {event.description && (
               <p className="caerus-detail-desc">{event.description}</p>
             )}
           </div>
+        </div>
 
+        {/* RIGHT: screen + seat map at the top, summary anchored at the bottom. */}
+        <div className="caerus-eventdetail-right">
           {soldOut && (
             <div className="caerus-detail-banner">This screening is sold out.</div>
           )}

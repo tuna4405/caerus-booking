@@ -2,62 +2,57 @@
   padding-block: var(--space-6);
 }
 
-/* Two columns; stack below 900px. */
-.caerus-detail-columns {
-  display: flex;
-  gap: var(--space-6);
-  align-items: flex-start;
-}
-.caerus-detail-poster-col {
-  flex: none;
-  width: var(--card-width);
-  max-width: 100%;
-}
-.caerus-detail-poster {
-  border-radius: var(--radius-card);
-}
-.caerus-detail-main {
-  flex: 1 1 auto;
-  min-width: 0; /* let the seat grid scroll instead of overflowing the page */
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
+/* Two columns:
+     LEFT   poster, then the event details stacked beneath it
+     RIGHT  screen + seat map at the top, summary card at the bottom
+   align-items:start starts both columns at the same top edge, so the poster
+   top and the arc top are level. Collapses to one column below 900px. */
+.caerus-eventdetail-layout {
+  display: grid;
+  grid-template-columns: var(--detail-left-width) 1fr;
+  gap: var(--space-7);
+  align-items: start;
 }
 
-/* Header ---------------------------------------------------------------- */
-.caerus-detail-header {
+/* LEFT column ----------------------------------------------------------- */
+.caerus-eventdetail-left {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-5); /* poster -> details */
+  min-width: 0;
 }
-.caerus-detail-meta {
-  margin: 0;
+.caerus-detail-poster {
+  max-width: var(--detail-left-width); /* stays poster-sized even when stacked full width */
+  border-radius: var(--radius-card);
+}
+.caerus-eventdetail-details {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
+  flex-direction: column;
+  gap: var(--space-2); /* one detail per line, tightly stacked */
+}
+.caerus-eventdetail-details h1 {
+  font-size: var(--text-xl); /* smaller than the global 2xl to sit in the narrow column */
+}
+.caerus-eventdetail-line {
+  margin: 0;
   color: var(--color-text);
 }
-.caerus-detail-sep {
-  color: var(--color-text-muted);
-}
-.caerus-detail-price {
-  margin: 0;
-}
-.caerus-detail-price-value {
-  font-weight: var(--weight-bold);
-}
-.caerus-detail-price-label {
-  color: var(--color-text-muted);
-}
 .caerus-detail-desc {
-  margin: 0;
+  margin: var(--space-3) 0 0; /* extra breathing room above the description */
   color: var(--color-text-muted);
+}
+
+/* RIGHT column ---------------------------------------------------------- */
+.caerus-eventdetail-right {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%; /* fill the row so the summary can anchor to the very bottom */
+  min-width: 0;     /* let the seat grid scroll rather than widen the page */
 }
 
 /* Banners (sold out / past) --------------------------------------------- */
 .caerus-detail-banner {
+  margin-bottom: var(--space-5);
   padding: var(--space-3) var(--space-4);
   background: var(--color-surface-alt);
   color: var(--color-text-muted);
@@ -67,6 +62,7 @@
 
 /* Conflict warning ------------------------------------------------------- */
 .caerus-detail-conflict {
+  margin-bottom: var(--space-5);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -90,11 +86,12 @@
 
 /* Selection summary + Continue ------------------------------------------ */
 .caerus-detail-summary {
+  margin-top: auto; /* push to the bottom of the right column; seat map rides up */
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-4);
-  background: var(--color-surface);
+  background: var(--color-accent);
   border: var(--border-hairline) solid var(--color-border);
   border-radius: var(--radius-card);
 }
@@ -125,7 +122,7 @@
 }
 .caerus-detail-total-label {
   font-size: var(--text-sm);
-  color: var(--color-text-muted);
+  color: var(--color-text-inverted);
 }
 .caerus-detail-total-value {
   font-size: var(--text-lg);
@@ -170,11 +167,15 @@
   border-radius: var(--radius);
 }
 
-/* Stack + stick the summary to the bottom on narrow screens. */
+/* Single column below 900px, in reading order: poster -> details ->
+   screen + seat map -> summary. The summary sticks to the viewport bottom. */
 @media (max-width: 900px) {
-  .caerus-detail-columns {
-    flex-direction: column;
-    align-items: stretch; /* full-width children when stacked (else content sets width) */
+  .caerus-eventdetail-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  .caerus-eventdetail-right {
+    min-height: 0; /* own content height once it's a row of its own */
   }
   .caerus-detail-summary {
     position: sticky;

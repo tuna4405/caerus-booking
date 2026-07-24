@@ -1,0 +1,195 @@
+.caerus-adminevents {
+  padding-block: var(--space-6);
+}
+
+/* Heading + top-right primary action ------------------------------------- */
+.caerus-adminevents-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+.caerus-adminevents-heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.caerus-adminevents-note {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Success banner after creating a screening (?created=1). */
+.caerus-adminevents-banner {
+  margin-bottom: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  background: var(--status-confirmed-bg);
+  color: var(--status-confirmed-fg);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius);
+}
+
+/* Table ------------------------------------------------------------------ */
+.caerus-adminevents-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.caerus-adminevents-table th {
+  padding: var(--space-3);
+  text-align: left;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  border-bottom: var(--border-hairline) solid var(--color-border);
+}
+.caerus-adminevents-table td {
+  padding: var(--space-3);
+  border-bottom: var(--border-hairline) solid var(--color-border);
+  vertical-align: top;
+}
+.caerus-adminevents-row:hover {
+  background: var(--color-surface);
+}
+
+.caerus-adminevents-title {
+  display: block;
+  font-weight: var(--weight-bold);
+}
+.caerus-adminevents-when {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Seats occupancy + progress bar ----------------------------------------- */
+.caerus-adminevents-seats-text {
+  display: block;
+  font-size: var(--text-sm);
+}
+.caerus-adminevents-bar {
+  display: block;
+  margin-top: var(--space-1);
+  width: 100%;
+  height: var(--space-1); /* 4px thin bar */
+  background: var(--color-surface-alt);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.caerus-adminevents-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--color-data);
+  border-radius: var(--radius);
+}
+.caerus-adminevents-bar-fill--full {
+  background: var(--color-danger);
+}
+
+.caerus-adminevents-poster-none {
+  color: var(--color-text-muted);
+}
+.caerus-adminevents-actions a {
+  white-space: nowrap;
+}
+
+/* Skeleton --------------------------------------------------------------- */
+.caerus-adminevents-skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.caerus-adminevents-skeleton {
+  min-height: var(--space-8);
+  background: var(--color-surface-alt);
+  border-radius: var(--radius);
+}
+
+/* Empty / error states --------------------------------------------------- */
+.caerus-adminevents-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding-block: var(--space-7);
+}
+.caerus-adminevents-state p {
+  margin: 0;
+}
+.caerus-adminevents-error {
+  color: var(--color-danger);
+  font-weight: var(--weight-medium);
+}
+
+/* Pagination ------------------------------------------------------------- */
+.caerus-adminevents-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+.caerus-adminevents-pageinfo {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Stacked cards below 720px --------------------------------------------- */
+@media (max-width: 720px) {
+  /* Hide the header row visually; the ::before labels carry the column names. */
+  .caerus-adminevents-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .caerus-adminevents-table,
+  .caerus-adminevents-table tbody,
+  .caerus-adminevents-row,
+  .caerus-adminevents-table td {
+    display: block;
+    width: auto;
+  }
+  .caerus-adminevents-row {
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+    border: var(--border-hairline) solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+  .caerus-adminevents-row:hover {
+    background: transparent; /* cards don't get the row hover */
+  }
+  .caerus-adminevents-table td {
+    padding: var(--space-1) 0;
+    border-bottom: none;
+  }
+  .caerus-adminevents-table td::before {
+    content: attr(data-label);
+    display: inline-block;
+    min-width: 40%;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+  /* Screening block sits at the top of the card, and the View link at the bottom —
+     neither gets a label. Prefixed with `td` to outrank the base td::before rule. */
+  .caerus-adminevents-table td.caerus-adminevents-screening {
+    padding-top: 0;
+  }
+  .caerus-adminevents-table td.caerus-adminevents-screening::before,
+  .caerus-adminevents-table td.caerus-adminevents-actions::before {
+    content: none;
+  }
+  /* Seats: label + text on one line, bar spans full width beneath. */
+  .caerus-adminevents-seats-text {
+    display: inline;
+    font-size: var(--text-md);
+  }
+  .caerus-adminevents-actions {
+    padding-top: var(--space-2);
+  }
+}

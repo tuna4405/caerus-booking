@@ -1,0 +1,80 @@
+.caerus-createevent {
+  padding-block: var(--space-6);
+}
+
+/* Single, narrow column. */
+.caerus-createevent-inner {
+  max-width: var(--container-medium); /* ~560px */
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.caerus-createevent-back {
+  align-self: flex-start;
+  padding-inline: 0;
+}
+
+.caerus-createevent-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.caerus-createevent-optional {
+  font-weight: var(--weight-regular);
+  color: var(--color-text-muted);
+}
+
+/* Textarea reuses the shared input styling; just give it height + vertical resize. */
+.caerus-createevent-textarea {
+  min-height: calc(var(--space-8) * 2);
+  resize: vertical;
+}
+
+/* Muted helper text (price format, timezone lines). */
+.caerus-createevent-hint {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.caerus-createevent-utc {
+  color: var(--color-text); /* the resolved UTC stands out slightly for sanity-checking */
+}
+
+/* Per-field validation message. */
+.caerus-createevent-fielderror {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+}
+
+/* Stubbed poster upload — a disabled drop-zone. */
+.caerus-createevent-banner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.caerus-createevent-banner-title {
+  font-size: var(--text-lg);
+}
+.caerus-createevent-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  text-align: center;
+  background: var(--color-surface);
+  border: var(--border-width) dashed var(--color-border);
+  border-radius: var(--radius-card);
+  color: var(--color-text-muted);
+}
+.caerus-createevent-dropzone-text {
+  margin: 0;
+  font-size: var(--text-sm);
+}

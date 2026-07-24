@@ -1,0 +1,95 @@
+/* Horizontal, dense list card: poster thumb | stacked details | status badge.
+   It's a link, so the neutral text colour and no-underline are set explicitly to
+   override the global anchor styles. Hover recolours the border (no lift — lifting
+   is the poster grid's move; this is a compact list). */
+.caerus-booking-card {
+  display: flex;
+  gap: var(--space-4);
+  align-items: stretch;
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: var(--border-hairline) solid var(--color-border);
+  border-radius: var(--radius-card);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: border-color var(--transition-fast);
+}
+.caerus-booking-card:hover {
+  border-color: var(--color-secondary);
+  text-decoration: none; /* beat the global a:hover underline */
+}
+
+/* Cancelled bookings stay in the list (history is deliberate) but read as dimmed. */
+.caerus-booking-card--cancelled {
+  opacity: 0.7;
+}
+
+/* Small 2:3 poster thumbnail; the Poster component supplies the placeholder. */
+.caerus-booking-card-poster {
+  width: var(--booking-thumb-width);
+  flex: none;
+  align-self: flex-start;
+  border-radius: var(--radius);
+}
+
+/* Details grow to fill; the badge sits at the far right. */
+.caerus-booking-card-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.caerus-booking-card-info {
+  min-width: 0; /* let long titles wrap/shrink instead of widening the card */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.caerus-booking-card-info p {
+  margin: 0;
+}
+.caerus-booking-card-title {
+  font-weight: var(--weight-bold);
+}
+.caerus-booking-card-when {
+  color: var(--color-text);
+}
+.caerus-booking-card-seats {
+  color: var(--color-text);
+}
+.caerus-booking-card-price {
+  font-weight: var(--weight-bold);
+}
+.caerus-booking-card-booked {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Status pill — colours come from the booking-status tokens, never invented. */
+.caerus-booking-badge {
+  flex: none;
+  align-self: flex-start;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+.caerus-booking-badge--confirmed {
+  color: var(--status-confirmed-fg);
+  background: var(--status-confirmed-bg);
+}
+.caerus-booking-badge--muted {
+  color: var(--status-cancelled-fg);
+  background: var(--status-cancelled-bg);
+}
+
+/* Very narrow: stack the poster above the details so nothing overflows. The badge
+   stays inline at the top-right of the details row. */
+@media (max-width: 480px) {
+  .caerus-booking-card {
+    flex-direction: column;
+  }
+}

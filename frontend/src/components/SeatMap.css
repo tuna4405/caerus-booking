@@ -8,27 +8,31 @@
 }
 
 /* SCREEN indicator — a constant-thickness curved BAND (a stroked SVG arc), wider
-   than the seat grid and overhanging equally on both sides. The label sits above
-   the arc's apex. currentColor drives the stroke, so it stays token-driven. */
+   than the seat grid and overhanging equally on both sides. The label sits ON the
+   band at its apex. currentColor drives the stroke, so it stays token-driven. */
 .caerus-seatmap-screen {
   /* Wider than the grid, still centred. The parent wrapper is width: fit-content,
      so 100% here is the grid's width. contain: inline-size keeps the SVG's own
      intrinsic width (viewBox ratio × height ≈ 693px) from inflating that wrapper —
-     without it the wrapper stretches to the full column and the band overflows. */
+     without it the wrapper stretches to the full column and the band overflows.
+     position: relative anchors the absolutely-positioned label. */
   contain: inline-size;
+  position: relative;
   width: calc(100% + var(--screen-overhang) * 2);
   margin-left: calc(var(--screen-overhang) * -1);
   margin-bottom: var(--screen-gap-below);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   color: var(--color-surface-alt); /* drives the arc via currentColor */
 }
 .caerus-seatmap-screen-label {
+  position: absolute;
+  left: 50%;
+  top: var(--screen-label-offset);
+  transform: translate(-50%, -50%); /* centre on the apex */
+  z-index: 1;
+  pointer-events: none;
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-tight);
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-1);
+  color: var(--color-text);
 }
 .caerus-seatmap-screen-arc {
   display: block;
