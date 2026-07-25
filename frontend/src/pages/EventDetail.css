@@ -114,6 +114,14 @@
   border: var(--border-hairline) solid var(--color-border);
   border-radius: var(--radius-card);
 }
+
+/* This card's crop of the shared pattern — adjust zoom/crop here. Panned to the
+   image's warm lower-left (orange/cream) so it blends with the accent base
+   instead of pulling in the pattern's teal, which read muddy over orange. */
+.caerus-detail-summary.caerus-decor-card::before {
+  background-size: 144%;
+  background-position: 30% 60%;
+}
 .caerus-detail-limit {
   margin: 0;
   color: var(--color-danger);

@@ -16,6 +16,12 @@
 .caerus-confirm-title {
   margin: 0;
 }
+/* This card's crop of the shared pattern — adjust zoom/crop here. Panned toward
+   the top-left so the busiest shapes sit behind the poster + details band. */
+.caerus-confirm-card.caerus-decor-card::before {
+  background-size: 190%;
+  background-position: 15% 35%;
+}
 
 /* Event row: small poster thumbnail beside title + meta. */
 .caerus-confirm-event {
@@ -24,7 +30,7 @@
   gap: var(--space-4);
 }
 .caerus-confirm-poster {
-  width: var(--space-8); /* 64px thumbnail; height follows the 2:3 aspect ratio */
+  width: 72px;
   flex: none;
   border-radius: var(--radius-card);
 }
@@ -50,7 +56,7 @@
 .caerus-confirm-event-aud {
   margin: 0;
   font-size: var(--text-sm);
-  color: var(--color-text-muted);
+  color: var(--color-text);
 }
 
 /* Seats + price breakdown (right-aligned values). */
@@ -67,7 +73,7 @@
   gap: var(--space-4);
 }
 .caerus-confirm-row dt {
-  color: var(--color-text-muted);
+  color: var(--color-text);
 }
 .caerus-confirm-row dd {
   margin: 0;
@@ -75,7 +81,7 @@
 }
 .caerus-confirm-row--total {
   padding-top: var(--space-3);
-  border-top: var(--border-hairline) solid var(--color-border);
+  border-top: var(--border-hairline) solid var(--color-text);
 }
 .caerus-confirm-row--total dt {
   color: var(--color-text);
@@ -93,12 +99,15 @@
   font-weight: var(--weight-medium);
 }
 
-/* Actions — stack if they don't fit. */
+/* Actions — Confirm + Back side by side, equal-ish width; stack if they don't fit. */
 .caerus-confirm-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
+}
+.caerus-confirm-actions .caerus-button {
+  flex: 1 1 0;
 }
 
 /* Terminal message views (invalid / gone / not bookable / load error). */

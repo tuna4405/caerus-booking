@@ -6,7 +6,7 @@
    or pixel spacing value in a component stylesheet. If a value you need
    isn't here, add it here first.
 
-   Requires Roboto — see index.html (<link> to Google Fonts).
+   Requires Montserrat — see index.html (<link> to Google Fonts).
    ========================================================================== */
 
 :root {
@@ -97,9 +97,9 @@
   --status-cancelled-bg: #ECEDEB;
 
   /* --- Typography --------------------------------------------------------
-     Roboto throughout, per the mockup. Weight does the work, not family. */
+     Montserrat throughout. Weight does the work, not family. */
 
-  --font-body:    'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body:    'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-heading: var(--font-body);
 
   --weight-regular: 400;
@@ -154,6 +154,12 @@
 
   --shadow-none:    none;
   --shadow-overlay: 0 4px 16px rgb(31 39 27 / 0.14);
+
+  /* --- Decorative card background ------------------------------------------
+     Shared faded-pattern treatment (src/assets/background.jpg) for .caerus-decor-card.
+     Low opacity + a translucent veil keep it a texture, not a competitor to text. */
+  --decor-opacity: 0.40;                    /* pattern strength */
+  --decor-veil:    rgba(255, 255, 255, 0.45); /* translucent white over the pattern, for contrast */
 
   /* --- Layout -------------------------------------------------------------- */
 
@@ -241,6 +247,40 @@ img { max-width: 100%; display: block; }
   max-width: var(--container-max);
   margin-inline: auto;
   padding-inline: var(--container-pad);
+}
+
+/* Reusable decorative card background — a faded geometric pattern behind a card's
+   content, never in front of it. Two stacked pseudo-elements, both z-index:-1
+   inside this element's own stacking context (isolation:isolate), so they paint
+   above the card's own background but below every normal child:
+     ::before  the pattern image, at --decor-opacity
+     ::after   a translucent veil (--decor-veil) on top, guaranteeing text contrast
+   Consuming cards keep their own background/padding/layout untouched and add this
+   class alongside. To show a DIFFERENT crop of the same image per card, override
+   ONLY background-size / background-position on that card's own `::before` (see
+   EventDetail.css / ConfirmBooking.css) — never redeclare the image or opacity
+   there, and never touch ::after. */
+.caerus-decor-card {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--color-bg);
+  overflow: hidden;
+  border-radius: var(--radius-card);
+}
+.caerus-decor-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url('../assets/background.jpg') center/cover no-repeat;
+  opacity: var(--decor-opacity);
+}
+.caerus-decor-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--decor-veil);
 }
 
 /* Visually hidden, still announced by screen readers (table captions, icon-only

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { getEventById, getSeatMap, createBooking, ApiError } from '../api/client';
-import { formatDateTime, formatPrice } from '../utils/format';
+import { formatDateTimeLong, formatPrice } from '../utils/format';
 import Poster from '../components/ui/Poster.jsx';
 import Button from '../components/ui/Button.jsx';
 import TimeZoneNote from '../components/ui/TimeZoneNote.jsx';
@@ -243,8 +243,8 @@ export default function ConfirmBooking() {
 
   return (
     <main className="caerus-container caerus-confirm">
-      <div className="caerus-confirm-card">
-        <h1 className="caerus-confirm-title">Confirm your booking</h1>
+      <div className="caerus-confirm-card caerus-decor-card">
+        <h1 className="caerus-confirm-title">Confirm booking</h1>
 
         <div className="caerus-confirm-event">
           <Poster
@@ -256,7 +256,7 @@ export default function ConfirmBooking() {
           <div className="caerus-confirm-event-info">
             <h2 className="caerus-confirm-event-title">{event.title}</h2>
             <p className="caerus-confirm-event-meta">
-              <span>{formatDateTime(event.startsAt)}</span>
+              <span>{formatDateTimeLong(event.startsAt)}</span>
               <TimeZoneNote />
             </p>
             <p className="caerus-confirm-event-aud">{event.auditorium}</p>
@@ -292,7 +292,7 @@ export default function ConfirmBooking() {
           <Button variant="action" onClick={handleConfirm} disabled={submitting}>
             {submitting ? 'Booking…' : 'Confirm booking'}
           </Button>
-          <Button as={Link} to={backTo} variant="quiet">Back</Button>
+          <Button as={Link} to={backTo} variant="secondary">Back</Button>
         </div>
       </div>
     </main>

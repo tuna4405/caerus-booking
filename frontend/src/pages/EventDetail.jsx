@@ -237,7 +237,7 @@ export default function EventDetail() {
           </section>
 
           {!readOnly && (
-            <div className="caerus-detail-summary">
+            <div className="caerus-detail-summary caerus-decor-card">
               {limitMsg && (
                 <p className="caerus-detail-limit" role="status">{limitMsg}</p>
               )}
