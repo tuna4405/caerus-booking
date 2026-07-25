@@ -157,8 +157,13 @@
 
   /* --- Decorative card background ------------------------------------------
      Shared faded-pattern treatment (src/assets/background.jpg) for .caerus-decor-card.
-     Low opacity + a translucent veil keep it a texture, not a competitor to text. */
+     Low opacity keeps it a texture, not a competitor to text. */
   --decor-opacity: 0.20;                    /* pattern strength */
+
+  /* Confirm booking card only: how far down the pattern fades in beneath the
+     clean heading band (see .caerus-confirm-card.caerus-decor-card mask). */
+  --confirm-fade-start: 64px;   /* pattern fully hidden above this — the clean band */
+  --confirm-fade-end:   120px;  /* pattern fully visible below this */
 
   /* --- Layout -------------------------------------------------------------- */
 

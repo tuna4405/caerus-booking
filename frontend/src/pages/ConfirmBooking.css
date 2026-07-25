@@ -8,9 +8,10 @@
   flex-direction: column;
   gap: var(--space-5);
   max-width: var(--container-medium);
+  margin-inline: auto; /* centre within .caerus-container's padding */
   padding: var(--space-5);
   background: var(--color-bg);
-  border: var(--border-hairline) solid var(--color-border);
+  border: var(--border-hairline) solid var(--color-text);
   border-radius: var(--radius-card);
 }
 .caerus-confirm-title {
@@ -21,6 +22,27 @@
 .caerus-confirm-card.caerus-decor-card::before {
   background-size: 100%;
   background-position: 35% 110%;
+}
+/* The heading needs to sit on clean card background, but a hard-cropped pattern
+   (e.g. a top offset) leaves a visible edge where it starts. Instead the pattern
+   covers the whole card (inset: 0, inherited from .caerus-decor-card) and fades
+   in via a mask, so there's no line anywhere — just a gradual reveal. Both layers
+   share the same mask so the veil doesn't show over the clean heading either.
+   Scoped to this card only; other decor cards keep their full-bleed pattern. */
+.caerus-confirm-card.caerus-decor-card::before,
+.caerus-confirm-card.caerus-decor-card::after {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent var(--confirm-fade-start),
+    black var(--confirm-fade-end)
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent var(--confirm-fade-start),
+    black var(--confirm-fade-end)
+  );
 }
 
 /* Event row: small poster thumbnail beside title + meta. */
