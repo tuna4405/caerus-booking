@@ -31,7 +31,9 @@
   gap: var(--space-2); /* one detail per line, tightly stacked */
 }
 .caerus-eventdetail-details h1 {
-  font-size: var(--text-xl); /* smaller than the global 2xl to sit in the narrow column */
+  /* Stepped down again (xl -> lg) now that the column itself is narrower — at xl,
+     even a moderate title like "Dune: Part Two" wrapped to two lines. */
+  font-size: var(--text-lg);
 }
 .caerus-eventdetail-line {
   margin: 0;
@@ -104,7 +106,7 @@
 .caerus-detail-summary {
   margin-top: auto; /* push to the bottom of the right column; seat map rides up */
   width: 100%;
-  max-width: 580px; /* match the seat frame; left edges align */
+  max-width: 600px; /* match the seat frame; left edges align */
   margin-inline: auto;
   display: flex;
   flex-direction: column;

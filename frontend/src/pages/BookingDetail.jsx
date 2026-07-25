@@ -5,22 +5,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { getBookingById, cancelBooking, ApiError } from '../api/client';
-import { formatDateTime, formatDateTimeLong, formatPrice } from '../utils/format';
 import Button from '../components/ui/Button.jsx';
-import TimeZoneNote from '../components/ui/TimeZoneNote.jsx';
+import TicketCard from '../components/TicketCard.jsx';
 import './BookingDetail.css';
 
 const CANCEL_TRIGGER_ID = 'caerus-cancel-trigger';
-
-// Badge mirrors BookingCard: confirmed+future = "Confirmed" (teal); confirmed+past
-// = "Completed"; cancelled = "Cancelled" (both settled states = grey).
-function badgeFor(booking) {
-  if (booking.status === 'cancelled') return { label: 'Cancelled', tone: 'muted' };
-  if (new Date(booking.startsAt).getTime() < Date.now()) {
-    return { label: 'Completed', tone: 'muted' };
-  }
-  return { label: 'Confirmed', tone: 'confirmed' };
-}
 
 function Frame({ children, busy = false }) {
   return (
@@ -42,8 +31,6 @@ function DetailSkeleton() {
   return (
     <Frame busy>
       <div className="caerus-bookingdetail-skel-line caerus-bookingdetail-skel-line--title" />
-      <div className="caerus-bookingdetail-skel-line" />
-      <div className="caerus-bookingdetail-skel-line" />
       <div className="caerus-bookingdetail-skel-line caerus-bookingdetail-skel-line--short" />
     </Frame>
   );
@@ -207,7 +194,6 @@ export default function BookingDetail() {
     );
   }
 
-  const badge = badgeFor(booking);
   const cancelled = booking.status === 'cancelled';
   const past = new Date(booking.startsAt).getTime() < Date.now();
   const canCancel = booking.status === 'confirmed' && !past;
@@ -216,6 +202,10 @@ export default function BookingDetail() {
   return (
     <Frame>
       <BackLink />
+
+      {/* TicketCard's own title is presentational (not a heading element), so the
+          page keeps one real, visually-hidden h1 for document structure / a11y. */}
+      <h1 className="sr-only">{booking.eventTitle} — booking details</h1>
 
       {cancelledBanner ? (
         <div className="caerus-bookingdetail-banner caerus-bookingdetail-banner--cancelled" role="status">
@@ -229,37 +219,7 @@ export default function BookingDetail() {
         )
       )}
 
-      <div className="caerus-bookingdetail-header">
-        <h1>{booking.eventTitle}</h1>
-        <span className={`caerus-bookingdetail-badge caerus-bookingdetail-badge--${badge.tone}`}>
-          {badge.label}
-        </span>
-      </div>
-
-      <dl className="caerus-bookingdetail-rows">
-        <div className="caerus-bookingdetail-row">
-          <dt>When</dt>
-          <dd>{formatDateTimeLong(booking.startsAt)} <TimeZoneNote /></dd>
-        </div>
-        <div className="caerus-bookingdetail-row">
-          <dt>Seats</dt>
-          <dd>{seatLabels}</dd>
-        </div>
-        <div className="caerus-bookingdetail-row">
-          <dt>Total</dt>
-          <dd className="caerus-bookingdetail-total">{formatPrice(booking.totalPrice)}</dd>
-        </div>
-        <div className="caerus-bookingdetail-row">
-          <dt>Booked on</dt>
-          <dd>{formatDateTime(booking.createdAt)}</dd>
-        </div>
-        {cancelled && booking.cancelledAt && (
-          <div className="caerus-bookingdetail-row">
-            <dt>Cancelled on</dt>
-            <dd>{formatDateTime(booking.cancelledAt)}</dd>
-          </div>
-        )}
-      </dl>
+      <TicketCard booking={booking} />
 
       {actionError && (
         <div className="caerus-bookingdetail-error" role="alert">{actionError}</div>
@@ -267,15 +227,6 @@ export default function BookingDetail() {
 
       {(canCancel || !cancelled) && (
         <div className="caerus-bookingdetail-actions">
-          {canCancel && (
-            <Button
-              id={CANCEL_TRIGGER_ID}
-              variant="danger"
-              onClick={() => setShowConfirm(true)}
-            >
-              Cancel booking
-            </Button>
-          )}
           {/* Ticket download needs Lambda + S3 (api-spec §3.5) — not built. Shown
               disabled so the roadmap is honest; hidden once cancelled (no ticket). */}
           {!cancelled && (
@@ -285,6 +236,15 @@ export default function BookingDetail() {
                 Ticket downloads arrive with the serverless release.
               </p>
             </div>
+          )}
+          {canCancel && (
+            <Button
+              id={CANCEL_TRIGGER_ID}
+              variant="danger"
+              onClick={() => setShowConfirm(true)}
+            >
+              Cancel
+            </Button>
           )}
         </div>
       )}

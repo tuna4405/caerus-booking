@@ -31,6 +31,13 @@ const dateLongFmt = new Intl.DateTimeFormat('en-GB', {
   month: 'long',
   year: 'numeric',
 });
+// Numeric slashed date — e.g. "25/07/2026" — for the ticket card's showtime line.
+const dateShowtimeFmt = new Intl.DateTimeFormat('en-GB', {
+  timeZone: CINEMA_TZ,
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+});
 
 // Integer VND -> Vietnamese currency, e.g. 90000 -> "90.000 ₫".
 export function formatPrice(vnd) {
@@ -62,6 +69,14 @@ export function formatDateTime(iso) {
 export function formatDateTimeLong(iso) {
   if (!iso) return '';
   return `${dateLongFmt.format(new Date(iso))} at ${formatTime(iso)}`;
+}
+
+// ISO-8601 UTC -> cinema-local date + time, e.g. "25/07/2026 at 19:50". The ticket
+// card's large showtime line — distinct style from formatDateTime/formatDateTimeLong,
+// which stay exactly as they are for the cards/pages already using them.
+export function formatDateShowtime(iso) {
+  if (!iso) return '';
+  return `${dateShowtimeFmt.format(new Date(iso))} at ${formatTime(iso)}`;
 }
 
 // Asia/Ho_Chi_Minh is a FIXED UTC+7 offset — no daylight saving, unchanged since

@@ -173,14 +173,24 @@
   --container-pad:  var(--space-5);
   --header-height:  72px;
   --logo-height:    32px;       /* navbar logo image height (width auto) */
-  --card-min-width: 170px;      /* event grid: min column track width */
-  --card-width:     220px;      /* event card natural (max) width */
-  --card-footer-height: 108px;  /* event card decorative footer height */
-  --detail-left-width: 280px;   /* event detail: left column (poster + details) */
+  --card-min-width: 170px;      /* event grid: min column track width (~2/3 of 170px — must stay <= --card-width or minmax() collapses to the min) */
+  --card-width:     220px;      /* event card natural (max) width (~2/3 of 220px) */
+  --card-footer-height: 108px;   /* event card decorative footer height (~2/3 of 108px; shapes are calc()-driven off this, see EventCard.css) */
+  --detail-left-width: 188px;   /* event detail: left column, poster + details (~2/3 of 280px) */
   --seat-area-width: 800px;     /* event detail: bordered seat frame + summary (equal width, left-aligned) */
-  --bookings-max-width: 760px;  /* My bookings: single-column list width */
-  --booking-thumb-width: 64px;  /* My bookings: booking card poster thumbnail */
+  --bookings-max-width: 1200px;  /* My bookings: single-column list width (was 760px) */
+  --booking-thumb-width: 48px;  /* My bookings: booking card poster thumbnail */
   --bookingdetail-max-width: 640px; /* Booking detail: single centred column */
+  --ticket-stub-width: 90px;    /* TicketCard: left perforated stub (barcode) */
+  --ticket-notch-size: 20px;    /* TicketCard: circular punch-outs at the perforation ends */
+  --ticket-barcode-unit: 2px;   /* TicketCard: decorative barcode bar-thickness unit */
+  --ticket-max-width: 640px;    /* TicketCard: shared size on My bookings + Booking detail */
+  --tooth-radius: 9px;          /* TicketCard: radius of the scalloped edge notches */
+  --tooth-gap: 22px;            /* TicketCard: centre-to-centre spacing of the notches */
+
+  /* --- Ticket card colour (reuses existing colours under ticket-specific names,
+     so the component reads semantically rather than pointing at unrelated tokens) */
+  --ticket-perf-color: var(--color-text-invert); /* dashed perforation line */
 
   /* --- Motion --------------------------------------------------------------- */
 

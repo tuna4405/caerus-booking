@@ -88,16 +88,27 @@
 }
 .caerus-event-card-date {
   margin: 0;
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   color: var(--color-ink);
+  /* At the smaller card width a full "25 Jul 2026, 19:30" can wrap to a second
+     line and collide with the availability text anchored at the footer's bottom
+     edge (fixed height, sized for one line) — one line + ellipsis instead. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .caerus-event-card-avail {
   position: absolute;
   z-index: 1;
   right: 0;
   bottom: 0;
+  left: 0; /* cap its shrink-to-fit width so a long phrase can't run under the title */
   margin: 0;
   padding: var(--space-3);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   color: var(--color-text-invert);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

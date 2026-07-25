@@ -32,54 +32,6 @@
   color: var(--status-cancelled-fg);
 }
 
-/* Header: title + status badge ------------------------------------------- */
-.caerus-bookingdetail-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
-}
-.caerus-bookingdetail-badge {
-  padding: var(--space-1) var(--space-3);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-medium);
-  border-radius: var(--radius);
-  white-space: nowrap;
-}
-.caerus-bookingdetail-badge--confirmed {
-  color: var(--status-confirmed-fg);
-  background: var(--status-confirmed-bg);
-}
-.caerus-bookingdetail-badge--muted {
-  color: var(--status-cancelled-fg);
-  background: var(--status-cancelled-bg);
-}
-
-/* Detail rows: muted label left, value right ----------------------------- */
-.caerus-bookingdetail-rows {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-.caerus-bookingdetail-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-.caerus-bookingdetail-row dt {
-  color: var(--color-text-muted);
-}
-.caerus-bookingdetail-row dd {
-  margin: 0;
-  text-align: right;
-  min-width: 0;
-}
-.caerus-bookingdetail-total {
-  font-weight: var(--weight-bold);
-}
-
 /* Inline cancel-error message -------------------------------------------- */
 .caerus-bookingdetail-error {
   padding: var(--space-3) var(--space-4);
@@ -89,8 +41,12 @@
   border-radius: var(--radius);
 }
 
-/* Actions ---------------------------------------------------------------- */
+/* Actions — same width + left/right edges as the ticket card, so the row reads
+   as belonging to it. The helper line stays left-aligned within this group. */
 .caerus-bookingdetail-actions {
+  width: 100%;
+  max-width: var(--ticket-max-width);
+  margin-inline: auto;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -138,7 +94,7 @@
   margin: 0;
 }
 
-/* Skeleton --------------------------------------------------------------- */
+/* Skeleton — a title line + one ticket-height block. --------------------- */
 .caerus-bookingdetail-skel-line {
   height: var(--space-4);
   background: var(--color-surface-alt);
@@ -149,19 +105,13 @@
   width: 60%;
 }
 .caerus-bookingdetail-skel-line--short {
-  width: 40%;
+  height: calc(var(--space-9) * 2 + var(--space-5));
+  width: 100%;
+  border-radius: var(--radius-card);
 }
 
-/* Narrow screens: stack rows, make action buttons full-width ------------- */
+/* Narrow screens: make action buttons full-width -------------------------- */
 @media (max-width: 480px) {
-  .caerus-bookingdetail-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-1);
-  }
-  .caerus-bookingdetail-row dd {
-    text-align: left;
-  }
   .caerus-bookingdetail-actions {
     flex-direction: column;
     align-items: stretch;

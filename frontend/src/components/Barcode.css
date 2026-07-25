@@ -1,0 +1,32 @@
+/* Decorative barcode — a rotated code string beside a stack of horizontal
+   stripes (see Barcode.jsx for why this reads as a vertical barcode without any
+   CSS rotate()). Sized to its own content (not stretched to the stub's full
+   height) so the stub's flex centring (see .caerus-ticket-stub) can centre it. */
+.caerus-barcode {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  width: 100%;
+}
+.caerus-barcode-code {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg); /* vertical-rl reads bottom-to-top by default; flip it */
+  flex: none;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+.caerus-barcode-bars {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--border-hairline);
+}
+.caerus-barcode-bar {
+  width: 100%;
+  flex: none;
+  background: var(--color-ink);
+}

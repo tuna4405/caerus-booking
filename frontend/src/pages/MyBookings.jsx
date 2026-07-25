@@ -1,6 +1,7 @@
 // Route: /my-bookings 🔒 (wrapped in <ProtectedRoute>). Lists the logged-in user's
 // own bookings from GET /bookings (api-spec §3.4). This file owns fetching, grouping
-// and page states; BookingCard is presentation only.
+// and page states; BookingCard is presentation only. (Booking detail uses the
+// fuller, ticket-styled TicketCard instead — this list stays plain and quiet.)
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 

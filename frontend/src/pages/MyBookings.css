@@ -30,7 +30,7 @@
   gap: var(--space-4);
 }
 
-/* Loading placeholder — three card-height blocks. */
+/* Loading placeholder — three row-height blocks. */
 .caerus-booking-skeleton {
   min-height: calc(var(--booking-thumb-width) * 1.5 + var(--space-3) * 2);
   background: var(--color-surface-alt);
