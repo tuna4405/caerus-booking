@@ -177,7 +177,8 @@
   --card-width:     220px;      /* event card natural (max) width (~2/3 of 220px) */
   --card-footer-height: 108px;   /* event card decorative footer height (~2/3 of 108px; shapes are calc()-driven off this, see EventCard.css) */
   --detail-left-width: 188px;   /* event detail: left column, poster + details (~2/3 of 280px) */
-  --seat-area-width: 800px;     /* event detail: bordered seat frame + summary (equal width, left-aligned) */
+  --seat-area-width: 800px;     /* event detail: bordered seat frame width */
+  --summary-width: var(--seat-area-width); /* event detail: selection summary width — matches the seat frame's width exactly, centred beneath it */
   --bookings-max-width: 1200px;  /* My bookings: single-column list width (was 760px) */
   --booking-thumb-width: 48px;  /* My bookings: booking card poster thumbnail */
   --bookingdetail-max-width: 640px; /* Booking detail: single centred column */
