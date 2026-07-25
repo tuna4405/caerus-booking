@@ -19,8 +19,8 @@
 /* This card's crop of the shared pattern — adjust zoom/crop here. Panned toward
    the top-left so the busiest shapes sit behind the poster + details band. */
 .caerus-confirm-card.caerus-decor-card::before {
-  background-size: 190%;
-  background-position: 15% 35%;
+  background-size: 100%;
+  background-position: 35% 110%;
 }
 
 /* Event row: small poster thumbnail beside title + meta. */

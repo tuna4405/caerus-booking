@@ -158,8 +158,7 @@
   /* --- Decorative card background ------------------------------------------
      Shared faded-pattern treatment (src/assets/background.jpg) for .caerus-decor-card.
      Low opacity + a translucent veil keep it a texture, not a competitor to text. */
-  --decor-opacity: 0.40;                    /* pattern strength */
-  --decor-veil:    rgba(255, 255, 255, 0.45); /* translucent white over the pattern, for contrast */
+  --decor-opacity: 0.20;                    /* pattern strength */
 
   /* --- Layout -------------------------------------------------------------- */
 

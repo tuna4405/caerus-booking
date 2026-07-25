@@ -290,7 +290,7 @@ export default function ConfirmBooking() {
 
         <div className="caerus-confirm-actions">
           <Button variant="action" onClick={handleConfirm} disabled={submitting}>
-            {submitting ? 'Booking…' : 'Confirm booking'}
+            {submitting ? 'Booking…' : 'Confirm'}
           </Button>
           <Button as={Link} to={backTo} variant="secondary">Back</Button>
         </div>
