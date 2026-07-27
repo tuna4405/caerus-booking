@@ -303,7 +303,6 @@ One booking. Users may only read their own; admin may read any.
 #### DELETE /bookings/:id 🔒
 
 Cancel a booking. Frees the seats (status back to `available`).
-**Week 3:** this moves to a Lambda function behind API Gateway — same path, same behavior.
 
 **Business rule:** cancellable any time **before** `startsAt` (no cutoff buffer). Once the show has started, the booking can no longer be cancelled.
 
@@ -346,7 +345,7 @@ Generate a PDF ticket for a confirmed booking. Implemented as a Lambda: it rende
 | POST | /bookings | 🔒 | Book seats (atomic) | EC2 Express |
 | GET | /bookings | 🔒 | My bookings | EC2 Express |
 | GET | /bookings/:id | 🔒 | Booking detail | EC2 Express |
-| DELETE | /bookings/:id | 🔒 | Cancel booking | Lambda (Week 3) |
+| DELETE | /bookings/:id | 🔒 | Cancel booking | EC2 Express |
 | POST | /bookings/:id/ticket | 🔒 | Generate PDF ticket | Lambda (Week 3) |
 
 ---
@@ -375,3 +374,4 @@ The S3-hosted frontend and the EC2 API live on different origins, so the browser
 | 2026-07-15 | Confirmed max 6 seats per booking; removed 1-hour cancellation cutoff — bookings now cancellable any time before showtime | Tai ☐ Tuan ☐ |
 | 2026-07-23 | Timestamps now represent showtimes in the cinema timezone `Asia/Ho_Chi_Minh` (UTC+7): wire format stays UTC, but `GET /events?date` filters by the Vietnam calendar date and clients display times in UTC+7 (§2.2, §3.2) | Tai ☐ Tuan ☐ |
 | 2026-07-23 | `bannerUrl` documented as a portrait 2:3 **poster** rather than a landscape banner — one image per event, field name unchanged (§3.2) | Tai ☐ Tuan ☐ |
+| 2026-07-28 | `DELETE /bookings/:id is now in EC2 instead of Lambda function (§3.4) | Tai ☐ Tuan ☐ |
