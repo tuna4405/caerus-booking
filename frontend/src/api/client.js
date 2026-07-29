@@ -79,6 +79,11 @@ export function getEventById(id) {
 export function createEvent(event) {
   return request('POST', '/events', { body: event, auth: true });
 }
+export function uploadBanner(eventId, file) {
+  const body = new FormData();
+  body.append('image', file);
+  return request('POST', `/events/${eventId}/banner`, { body, auth: true });
+}
 
 // ---- Seats (§3.3) ----
 export function getSeatMap(eventId) {
@@ -99,6 +104,5 @@ export function cancelBooking(bookingId) {
   return request('DELETE', `/bookings/${bookingId}`, { auth: true });
 }
 
-// NOT BUILT ON THE BACKEND YET — needs S3 / Lambda. Screens stub these.
-// export function uploadBanner(eventId, file) { ... }
+// NOT BUILT ON THE BACKEND YET — needs Lambda. Screens stub this one.
 // export function generateTicket(bookingId) { ... }

@@ -25,7 +25,15 @@ export default function Poster({ src, title, className = '', loading = 'lazy' })
           src={src}
           alt=""
           loading={loading}
-          onError={() => setFailed(true)}
+          onError={() => {
+            // Dev-only visibility: a 403 (expired/invalid presigned URL) or a
+            // missing object both land here, and previously vanished silently
+            // behind the letter-placeholder fallback below.
+            if (import.meta.env.DEV) {
+              console.warn(`Poster failed to load: ${src}`);
+            }
+            setFailed(true);
+          }}
         />
       ) : (
         <span className="caerus-poster-letter" aria-hidden="true">

@@ -165,7 +165,7 @@ List upcoming events. Public, no auth.
       "durationMinutes": 96,
       "auditorium": "Room 1",
       "price": 90000,
-      "bannerUrl": "https://caerus-images.s3.amazonaws.com/events/3/banner.jpg",
+      "bannerUrl": "https://caerus-images.s3.ap-southeast-1.amazonaws.com/events/3/banner.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=...&X-Amz-Date=20260729T000000Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=...",
       "totalSeats": 60,
       "availableSeats": 42
     }
@@ -175,6 +175,8 @@ List upcoming events. Public, no auth.
 ```
 
 **Note on `bannerUrl`:** the URL of the event's **poster** — a portrait image at a 2:3 aspect ratio (e.g. 400×600), rendered as the poster on event cards and the event detail page. The field name is historical (it holds a poster, not a landscape banner). It remains **nullable**, since an event exists before its image is uploaded.
+
+**`bannerUrl` is a presigned S3 URL, not a stable link.** `caerus-images` is a private bucket, so every `bannerUrl` returned by the API is signed fresh with a **1-hour expiry**. Clients must NOT cache or persist this value across requests — always call the API again to get a current URL rather than reusing an old one, which will 403 once it expires.
 
 #### GET /events/:id
 
@@ -208,7 +210,7 @@ Admin uploads a banner image. `Content-Type: multipart/form-data`, field name `i
 
 The image should be a **portrait 2:3 poster** (e.g. 400×600; jpg/png, max 5 MB as above). Images with a materially different aspect ratio are centre-cropped to 2:3 by the frontend, so a landscape upload will have its sides cut off. Server-side aspect-ratio validation is **optional polish** for the AWS phase when this endpoint is built — a suggestion, not a committed requirement.
 
-- `200 OK` → `{ "bannerUrl": "https://..." }`
+- `200 OK` → `{ "bannerUrl": "https://..." }` — a presigned URL, same 1-hour-expiry rule as `bannerUrl` in §3.2 above.
 - `400` `VALIDATION_ERROR` (wrong type / too big), `401`, `403`, `404`
 
 ---
@@ -375,3 +377,4 @@ The S3-hosted frontend and the EC2 API live on different origins, so the browser
 | 2026-07-23 | Timestamps now represent showtimes in the cinema timezone `Asia/Ho_Chi_Minh` (UTC+7): wire format stays UTC, but `GET /events?date` filters by the Vietnam calendar date and clients display times in UTC+7 (§2.2, §3.2) | Tai ☐ Tuan ☐ |
 | 2026-07-23 | `bannerUrl` documented as a portrait 2:3 **poster** rather than a landscape banner — one image per event, field name unchanged (§3.2) | Tai ☐ Tuan ☐ |
 | 2026-07-28 | `DELETE /bookings/:id is now in EC2 instead of Lambda function (§3.4) | Tai ☐ Tuan ☐ |
+| 2026-07-29 | `bannerUrl` is now a **presigned** S3 URL (1-hour expiry) since `caerus-images` is a private bucket — clients must not cache it (§3.2) | Tai ☐ Tuan ☐ |

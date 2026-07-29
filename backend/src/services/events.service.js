@@ -8,6 +8,7 @@
 const pool = require('../config/db');
 const { ValidationError, NotFoundError } = require('../lib/errors');
 const { CINEMA_TIMEZONE } = require('../config/timezone');
+const s3 = require('../lib/s3');
 
 // Shared SELECT: an event plus its computed seat counts (schema doc §6.1).
 // Each caller appends its own WHERE / GROUP BY / ORDER / LIMIT.
@@ -22,7 +23,9 @@ const EVENT_SELECT = `
 
 // DB row → API event object (snake_case → camelCase, schema doc §2).
 // COUNT() returns bigint, which pg hands back as a string — coerce to Number.
-function mapEventRow(row) {
+// banner_url stores an S3 KEY, not a URL (caerus-images is private) — a fresh
+// presigned URL is signed on every read so it never goes stale in the DB.
+async function mapEventRow(row) {
   return {
     id: row.id,
     title: row.title,
@@ -31,7 +34,7 @@ function mapEventRow(row) {
     durationMinutes: row.duration_minutes,
     auditorium: row.auditorium,
     price: row.price,
-    bannerUrl: row.banner_url, // null until a banner is uploaded
+    bannerUrl: row.banner_url ? await s3.getSignedImageUrl(row.banner_url) : null,
     totalSeats: Number(row.total_seats),
     availableSeats: Number(row.available_seats),
   };
@@ -116,8 +119,11 @@ async function listEvents({ date, page, limit }) {
   );
   const totalItems = Number(countResult.rows[0].total);
 
+  // Sign every event's banner URL in parallel — never await one at a time.
+  const events = await Promise.all(listResult.rows.map(mapEventRow));
+
   return {
-    events: listResult.rows.map(mapEventRow),
+    events,
     pagination: {
       page: safePage,
       limit: safeLimit,
@@ -145,7 +151,7 @@ async function getEventById(id) {
   if (result.rows.length === 0) {
     throw new NotFoundError('Event not found.');
   }
-  return mapEventRow(result.rows[0]);
+  return await mapEventRow(result.rows[0]);
 }
 
 async function createEvent(eventData) {
@@ -216,7 +222,7 @@ async function createEvent(eventData) {
     await client.query('COMMIT');
 
     // Same shape as GET /events/:id (bannerUrl null, counts 60/60), via mapEventRow.
-    return mapEventRow(created.rows[0]);
+    return await mapEventRow(created.rows[0]);
   } catch (err) {
     await client.query('ROLLBACK').catch(() => {});
     throw err;
@@ -226,7 +232,27 @@ async function createEvent(eventData) {
 }
 
 async function uploadBanner(id, file) {
-  throw new Error('events.service#uploadBanner not implemented yet');
+  // Non-numeric / out-of-range id → 404, same rule as getEventById/getSeatMap.
+  const eventId = parseEventId(id);
+  if (eventId === null) {
+    throw new NotFoundError('Event not found.');
+  }
+  const eventExists = await pool.query('SELECT 1 FROM events WHERE id = $1', [eventId]);
+  if (eventExists.rows.length === 0) {
+    throw new NotFoundError('Event not found.');
+  }
+
+  // One banner per event; overwriting the same key keeps old uploads from
+  // piling up in the bucket when an admin re-uploads a poster.
+  const ext = file.mimetype === 'image/png' ? 'png' : 'jpg';
+  const key = `events/${eventId}/banner.${ext}`;
+  await s3.uploadImage(file.buffer, key, file.mimetype);
+
+  // banner_url stores the S3 KEY (caerus-images is private); the response
+  // still returns a presigned URL, signed fresh right before it goes out.
+  await pool.query('UPDATE events SET banner_url = $1 WHERE id = $2', [key, eventId]);
+
+  return { bannerUrl: await s3.getSignedImageUrl(key) };
 }
 
 async function getSeatMap(eventId) {

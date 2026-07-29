@@ -5,7 +5,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { createEvent, ApiError } from '../../api/client';
+import { createEvent, uploadBanner, ApiError } from '../../api/client';
 import { localCinemaToUtcIso } from '../../utils/format';
 import Button from '../../components/ui/Button.jsx';
 import FormError from '../../components/ui/FormError.jsx';
@@ -27,6 +27,7 @@ export default function CreateEvent() {
   const [durationMinutes, setDurationMinutes] = useState('');
   const [auditorium, setAuditorium] = useState('');
   const [price, setPrice] = useState('');
+  const [posterFile, setPosterFile] = useState(null);
 
   const [errors, setErrors] = useState({}); // per-field messages
   const [formError, setFormError] = useState('');
@@ -57,6 +58,16 @@ export default function CreateEvent() {
     else if (new Date(resolvedUtc).getTime() <= Date.now()) {
       e.startsAt = 'Screenings must be in the future.';
     }
+
+    // Mirrors the backend's multer fileFilter/limits (api-spec §3.2) so a bad
+    // file is caught before the event is even created.
+    if (posterFile) {
+      if (!['image/jpeg', 'image/png'].includes(posterFile.type)) {
+        e.poster = 'Poster must be a jpg or png file.';
+      } else if (posterFile.size > 5 * 1024 * 1024) {
+        e.poster = 'Poster must be 5 MB or smaller.';
+      }
+    }
     return e;
   }
 
@@ -73,7 +84,7 @@ export default function CreateEvent() {
     setSubmitting(true);
 
     try {
-      await createEvent({
+      const created = await createEvent({
         title: title.trim(),
         description: description.trim(),
         startsAt: resolvedUtc, // ISO-8601 UTC, converted from cinema local time
@@ -81,6 +92,12 @@ export default function CreateEvent() {
         auditorium: auditorium.trim(),
         price: Number(price),
       });
+      // The event exists at this point even if the poster upload below fails —
+      // there's no edit screen yet, so a failure here just surfaces as a form
+      // error and leaves the (posterless) screening in place.
+      if (posterFile) {
+        await uploadBanner(created.id, posterFile);
+      }
       // The list reads ?created=1 once and shows a success banner (same as elsewhere).
       navigate('/admin/events?created=1');
     } catch (err) {
@@ -220,17 +237,25 @@ export default function CreateEvent() {
             {errors.price && <p className="caerus-createevent-fielderror" id="ce-price-err" role="alert">{errors.price}</p>}
           </div>
 
-          {/* Poster upload is stubbed. POST /events/:id/banner is not built yet (needs
-              S3). When it lands, the flow is: create the event (get its id from the
-              201), THEN upload the file to /events/:id/banner — client.js request()
-              already handles FormData, so no multipart work is added here now. */}
+          {/* Uploaded via POST /events/:id/banner (api-spec §3.2) right after the
+              event itself is created — see handleSubmit. */}
           <section className="caerus-createevent-banner" aria-labelledby="ce-poster-h">
-            <h2 className="caerus-createevent-banner-title" id="ce-poster-h">Poster</h2>
+            <h2 className="caerus-createevent-banner-title" id="ce-poster-h">Poster <span className="caerus-createevent-optional">(optional)</span></h2>
             <div className="caerus-createevent-dropzone">
-              <input type="file" accept="image/png,image/jpeg" disabled aria-label="Poster upload (coming soon)" />
-              <p className="caerus-createevent-dropzone-text">Poster upload arrives with the S3 release.</p>
+              <input
+                type="file"
+                accept="image/png,image/jpeg"
+                aria-label="Poster upload"
+                aria-invalid={errors.poster ? 'true' : undefined}
+                aria-describedby={describedBy('ce-poster', true, !!errors.poster)}
+                onChange={(e) => setPosterFile(e.target.files?.[0] ?? null)}
+              />
+              {posterFile && (
+                <p className="caerus-createevent-dropzone-text">{posterFile.name}</p>
+              )}
             </div>
-            <p className="caerus-createevent-hint">Portrait 2:3 image (e.g. 400×600).</p>
+            <p className="caerus-createevent-hint" id="ce-poster-hint">Portrait 2:3 image (e.g. 400×600), jpg or png, max 5 MB.</p>
+            {errors.poster && <p className="caerus-createevent-fielderror" id="ce-poster-err" role="alert">{errors.poster}</p>}
           </section>
 
           <Button type="submit" variant="primary" disabled={submitting}>

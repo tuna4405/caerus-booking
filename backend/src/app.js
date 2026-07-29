@@ -9,8 +9,11 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-// TODO: restrict origin to the S3 site + http://localhost:5173 (see docs/api-spec.md §6)
-app.use(cors());
+const allowedOrigins = [
+  'http://caerus-frontend-web.s3-website-ap-southeast-1.amazonaws.com',
+  'http://localhost:5173',
+];
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 app.get('/api/v1/health', (req, res) => {
