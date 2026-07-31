@@ -1,5 +1,5 @@
 // S3 helpers for banner uploads (S3_BUCKET_IMAGES) and ticket PDFs
-// (S3_BUCKET_TICKETS, Week 3 Lambda).
+// (S3_BUCKET_TICKETS) — the PDF bytes come from lib/ticketPdf.js.
 //
 // The SDK is given no explicit credentials — on EC2 it picks up the
 // instance's IAM role automatically, which is what lets traffic reach S3
@@ -31,7 +31,37 @@ async function getSignedImageUrl(key, expiresIn = 3600) {
   return getSignedUrl(s3, command, { expiresIn });
 }
 
+// Ticket PDFs are re-rendered and overwritten on every download click (no
+// caching), so this always fires right before getSignedTicketUrl below.
+// ContentDisposition forces a real download instead of the browser's inline
+// PDF viewer taking over the tab.
+async function uploadTicket(buffer, key, bookingId) {
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: process.env.S3_BUCKET_TICKETS,
+      Key: key,
+      Body: buffer,
+      ContentType: 'application/pdf',
+      ContentDisposition: `attachment; filename="caerus-ticket-${bookingId}.pdf"`,
+    })
+  );
+  return key;
+}
+
+// caerus-tickets-* is a private bucket too; same signed-URL pattern as
+// getSignedImageUrl, just pointed at the tickets bucket + a shorter default
+// expiry since a ticket is downloaded once, right after generating it.
+async function getSignedTicketUrl(key, expiresIn = 300) {
+  const command = new GetObjectCommand({
+    Bucket: process.env.S3_BUCKET_TICKETS,
+    Key: key,
+  });
+  return getSignedUrl(s3, command, { expiresIn });
+}
+
 module.exports = {
   uploadImage,
   getSignedImageUrl,
+  uploadTicket,
+  getSignedTicketUrl,
 };

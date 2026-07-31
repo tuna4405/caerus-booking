@@ -13,7 +13,7 @@ This document defines every HTTP endpoint the Caerus backend exposes. It is the 
 
 - **Backend (Tai):** Express API on EC2 + PostgreSQL on RDS must implement these endpoints exactly as written.
 - **Frontend (Tuan):** React app on S3 codes against these shapes, first with mock data, then with the real API.
-- **Serverless (Week 3):** "Cancel booking" and "Generate ticket" will later move to Lambda behind API Gateway, but their request/response shapes stay identical — the frontend should not notice the switch.
+- **Serverless (Week 3):** ~~"Cancel booking" and "Generate ticket" will later move to Lambda behind API Gateway~~ — superseded, see §7 changelog 2026-07-28, 2026-07-29, and 2026-07-30. Both stayed on `POST/DELETE /bookings/...` as EC2 Express routes end to end — "Generate ticket" briefly invoked a Lambda internally just for the PDF-render step, then that was removed too (2026-07-30): the workload was too small/simple to justify the operational cost of a second deployable (separate IAM role, separate deploy step, no DB access so ownership checks would've had to be duplicated). Request/response shapes are unchanged from what's documented below.
 
 **Rule:** Nobody changes this spec unilaterally. If something must change, both teammates agree and the doc is updated first.
 
@@ -27,7 +27,7 @@ This document defines every HTTP endpoint the Caerus backend exposes. It is the 
 |---|---|
 | Local development | `http://localhost:3000/api/v1` |
 | Production (EC2) | `http://<ec2-public-dns>:3000/api/v1` (later behind proper domain) |
-| Lambda routes (Week 3) | `https://<api-gateway-id>.execute-api.ap-southeast-1.amazonaws.com/prod` |
+| ~~Lambda routes (Week 3)~~ | Not used — see §7 changelog 2026-07-29. `POST /bookings/:id/ticket` stayed under the EC2 base URL above; no API Gateway was introduced. |
 
 All endpoint paths below are relative to the base URL.
 
@@ -314,22 +314,33 @@ Cancel a booking. Frees the seats (status back to `available`).
 
 ---
 
-### 3.5 Tickets (Week 3 — Lambda)
+### 3.5 Tickets
 
 #### POST /bookings/:id/ticket 🔒
 
-Generate a PDF ticket for a confirmed booking. Implemented as a Lambda: it renders the PDF, saves it to the S3 tickets bucket, and returns a temporary (pre-signed) download URL.
+Generate (or re-generate) a PDF ticket for a confirmed booking and return a
+temporary download URL. Fully implemented on **EC2 Express** — same auth
+middleware and ownership rule as the rest of §3.4 (owner or admin). The
+handler fetches and authorizes the booking, renders the PDF in-process
+(`lib/ticketPdf.js`, `pdfkit`), uploads it to the S3 tickets bucket
+(`lib/s3.js#uploadTicket`), then signs that key into a presigned URL (5 min
+expiry) before responding. No Lambda involved (see §1, §7 changelog
+2026-07-30 — a Lambda briefly did the render step, removed as unnecessary
+for a workload this small).
+
+Calling this again for the same booking just re-renders and overwrites the
+same S3 key — safe to call more than once (e.g. the user downloads twice).
 
 **Response `200 OK`:**
 ```json
 {
-  "ticketUrl": "https://caerus-tickets.s3.amazonaws.com/tickets/55.pdf?X-Amz-Signature=...",
-  "expiresAt": "2026-07-15T10:12:00Z"
+  "ticketUrl": "https://caerus-tickets-dev.s3.ap-southeast-1.amazonaws.com/bookings/55/ticket.pdf?X-Amz-Signature=...",
+  "expiresAt": "2026-07-29T10:17:00Z"
 }
 ```
 
-- `401`, `403`, `404`
-- `409` `BOOKING_NOT_CANCELLABLE` reused? No — use `404` if booking is cancelled (a cancelled booking has no ticket).
+- `401`, `403`
+- `404` — booking doesn't exist, **or** it does but is `cancelled` (decided here: a cancelled booking has no ticket, so it 404s exactly like a missing one — deliberately not a new `409` code).
 
 ---
 
@@ -348,7 +359,7 @@ Generate a PDF ticket for a confirmed booking. Implemented as a Lambda: it rende
 | GET | /bookings | 🔒 | My bookings | EC2 Express |
 | GET | /bookings/:id | 🔒 | Booking detail | EC2 Express |
 | DELETE | /bookings/:id | 🔒 | Cancel booking | EC2 Express |
-| POST | /bookings/:id/ticket | 🔒 | Generate PDF ticket | Lambda (Week 3) |
+| POST | /bookings/:id/ticket | 🔒 | Generate PDF ticket | EC2 Express |
 
 ---
 
@@ -378,3 +389,5 @@ The S3-hosted frontend and the EC2 API live on different origins, so the browser
 | 2026-07-23 | `bannerUrl` documented as a portrait 2:3 **poster** rather than a landscape banner — one image per event, field name unchanged (§3.2) | Tai ☐ Tuan ☐ |
 | 2026-07-28 | `DELETE /bookings/:id is now in EC2 instead of Lambda function (§3.4) | Tai ☐ Tuan ☐ |
 | 2026-07-29 | `bannerUrl` is now a **presigned** S3 URL (1-hour expiry) since `caerus-images` is a private bucket — clients must not cache it (§3.2) | Tai ☐ Tuan ☐ |
+| 2026-07-29 | `POST /bookings/:id/ticket` implemented: stays on EC2 Express (not behind API Gateway) and invokes the `caerus-generate-ticket` Lambda only for the PDF-render step — the Lambda has no DB/VPC access, avoiding the networking cost of reaching RDS from inside a VPC-attached Lambda (§1, §2.1, §3.5, §4) | Tai ☐ Tuan ☐ |
+| 2026-07-30 | `caerus-generate-ticket` Lambda **removed** — PDF rendering moved in-process into EC2 Express (`lib/ticketPdf.js` + `pdfkit`), no code or infra changes to request/response shape. Reasoning: the render step was too small/cheap to justify a second deployable (own IAM role, own deploy pipeline) with no DB access of its own (§1, §3.5, §4) | Tai ☐ Tuan ☐ |

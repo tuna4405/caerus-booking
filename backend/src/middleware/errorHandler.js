@@ -7,6 +7,13 @@ function errorHandler(err, req, res, next) {
   const code = err.code || 'INTERNAL_ERROR';
   const message = err.message || 'Something went wrong.';
 
+  // Unexpected errors (no statusCode set by one of our own error classes)
+  // were previously invisible in pm2 logs — the client got a clean 500 JSON
+  // body but nothing was ever printed server-side to explain why.
+  if (!err.statusCode) {
+    console.error(`[${req.method} ${req.originalUrl}]`, err);
+  }
+
   const body = { error: { code, message } };
   if (err.conflictingSeatIds) {
     body.error.conflictingSeatIds = err.conflictingSeatIds;

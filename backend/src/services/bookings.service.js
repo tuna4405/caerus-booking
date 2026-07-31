@@ -12,6 +12,8 @@ const {
   ForbiddenError,
   BookingNotCancellableError,
 } = require('../lib/errors');
+const s3 = require('../lib/s3');
+const { renderTicketPdf } = require('../lib/ticketPdf');
 
 const MAX_INT4 = 2147483647; // PostgreSQL int4 upper bound — reject ids beyond it (no 500).
 
@@ -340,4 +342,78 @@ async function cancelBooking({ bookingId, userId, userRole }) {
   }
 }
 
-module.exports = { createBooking, getMyBookings, getBookingById, cancelBooking };
+async function generateTicket({ bookingId, userId, userRole }) {
+  // Validate the id up front — non-numeric / out-of-range → 404, same rule as
+  // getBookingById/cancelBooking.
+  const id = parseId(bookingId);
+  if (id === null) {
+    throw new NotFoundError('Booking not found.');
+  }
+
+  // 1. The booking + its event's title/starts_at/auditorium (the ticket needs
+  //    the room number, which getBookingById's SELECT doesn't fetch).
+  const result = await pool.query(
+    `SELECT b.id, b.user_id, b.status, b.total_price,
+            e.title AS event_title, e.starts_at, e.auditorium
+     FROM bookings b
+     JOIN events e ON e.id = b.event_id
+     WHERE b.id = $1`,
+    [id]
+  );
+  const b = result.rows[0];
+
+  // 2. Ownership (404 before 403 — same rule as everywhere else).
+  if (!b) {
+    throw new NotFoundError('Booking not found.');
+  }
+  const isOwner = b.user_id === userId;
+  const isAdmin = userRole === 'admin';
+  if (!isOwner && !isAdmin) {
+    throw new ForbiddenError('You do not have access to this booking.');
+  }
+
+  // 3. A cancelled booking has no ticket — api-spec §3.5 calls for 404 here,
+  //    not a new 409 code, deliberately: to the caller it should look the
+  //    same as "there is nothing to download", not "there is a conflict".
+  if (b.status !== 'confirmed') {
+    throw new NotFoundError('This booking has no ticket to download.');
+  }
+
+  // 4. This booking's seats, human-readable ("D5", "D6") for the PDF.
+  const seatsResult = await pool.query(
+    `SELECT s.seat_row, s.seat_number
+     FROM booking_seats bs
+     JOIN seats s ON s.id = bs.seat_id
+     WHERE bs.booking_id = $1
+     ORDER BY s.seat_row, s.seat_number`,
+    [id]
+  );
+  const seatLabels = seatsResult.rows.map((s) => `${s.seat_row}${s.seat_number}`);
+
+  // 5. Render the PDF and upload it, overwriting the same key every time —
+  //    a ticket is cheap to re-render, so there's no cache to invalidate.
+  const pdfBuffer = await renderTicketPdf({
+    bookingId: id,
+    eventTitle: b.event_title,
+    startsAt: b.starts_at,
+    auditorium: b.auditorium,
+    seatLabels,
+    totalPrice: b.total_price,
+  });
+  const key = `bookings/${id}/ticket.pdf`;
+  await s3.uploadTicket(pdfBuffer, key, id);
+
+  const expiresIn = 300; // 5 minutes — matches getSignedTicketUrl's default
+  const ticketUrl = await s3.getSignedTicketUrl(key, expiresIn);
+  const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
+
+  return { ticketUrl, expiresAt };
+}
+
+module.exports = {
+  createBooking,
+  getMyBookings,
+  getBookingById,
+  cancelBooking,
+  generateTicket,
+};

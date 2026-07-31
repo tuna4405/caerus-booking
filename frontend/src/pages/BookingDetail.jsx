@@ -1,10 +1,10 @@
 // Route: /bookings/:id 🔒 (wrapped in <ProtectedRoute>). One booking, with the
-// cancel flow (api-spec §3.4) and a stubbed ticket download (§3.5 — not built).
-// This file owns fetching, cancel logic and routing; presentation is inline.
+// cancel flow (api-spec §3.4) and the ticket download flow (§3.5).
+// This file owns fetching, cancel/download logic and routing; presentation is inline.
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
-import { getBookingById, cancelBooking, ApiError } from '../api/client';
+import { getBookingById, cancelBooking, generateTicket, ApiError } from '../api/client';
 import Button from '../components/ui/Button.jsx';
 import TicketCard from '../components/TicketCard.jsx';
 import './BookingDetail.css';
@@ -58,6 +58,10 @@ export default function BookingDetail() {
   const [actionError, setActionError] = useState(null); // string | node
   const cancellingRef = useRef(false); // synchronous double-submit guard
   const confirmRef = useRef(null);
+
+  // Ticket download flow.
+  const [downloading, setDownloading] = useState(false);
+  const downloadingRef = useRef(false); // synchronous double-click guard
 
   // Strip ?created=1 after the first render so a refresh won't replay the banner.
   useEffect(() => {
@@ -165,6 +169,42 @@ export default function BookingDetail() {
     );
   }
 
+  async function handleDownloadTicket() {
+    if (downloadingRef.current) return; // fast double-click: the ref beats the re-render
+    downloadingRef.current = true;
+    setDownloading(true);
+    setActionError(null);
+
+    try {
+      const { ticketUrl } = await generateTicket(id);
+      // A new tab so the booking page (and its cancel flow) stays put behind it.
+      window.open(ticketUrl, '_blank', 'noopener');
+    } catch (err) {
+      handleDownloadError(err);
+    } finally {
+      downloadingRef.current = false;
+      setDownloading(false);
+    }
+  }
+
+  function handleDownloadError(err) {
+    if (err instanceof ApiError) {
+      if (err.code === 'NOT_FOUND') {
+        setActionError('This booking has no ticket to download.');
+        return;
+      }
+      if (err.code === 'FORBIDDEN') {
+        setActionError("You don’t have permission to download this ticket.");
+        return;
+      }
+      if (err.code === 'UNAUTHORIZED') {
+        navigate('/login', { state: { from: location.pathname + location.search } });
+        return;
+      }
+    }
+    setActionError('Couldn’t generate the ticket. Please try again.');
+  }
+
   if (loading) return <DetailSkeleton />;
 
   if (error) {
@@ -227,14 +267,13 @@ export default function BookingDetail() {
 
       {(canCancel || !cancelled) && (
         <div className="caerus-bookingdetail-actions">
-          {/* Ticket download needs Lambda + S3 (api-spec §3.5) — not built. Shown
-              disabled so the roadmap is honest; hidden once cancelled (no ticket). */}
+          {/* Ticket download (api-spec §3.5) — hidden once cancelled, since a
+              cancelled booking has no ticket (the API 404s for it too). */}
           {!cancelled && (
             <div className="caerus-bookingdetail-ticket">
-              <Button variant="secondary" disabled>Download ticket</Button>
-              <p className="caerus-bookingdetail-ticket-note">
-                Ticket downloads arrive with the serverless release.
-              </p>
+              <Button variant="secondary" onClick={handleDownloadTicket} disabled={downloading}>
+                {downloading ? 'Generating…' : 'Download ticket'}
+              </Button>
             </div>
           )}
           {canCancel && (

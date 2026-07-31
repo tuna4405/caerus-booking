@@ -59,3 +59,18 @@ exports.cancelBooking = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.generateTicket = async (req, res, next) => {
+  // POST /bookings/:id/ticket 🔒 — api-spec §3.5. Renders + uploads the PDF
+  // in-process (lib/ticketPdf.js + lib/s3.js), returns a presigned download URL.
+  try {
+    const result = await bookingsService.generateTicket({
+      bookingId: req.params.id,
+      userId: req.user.id,
+      userRole: req.user.role,
+    });
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+};

@@ -103,6 +103,6 @@ export function getBookingById(id) {
 export function cancelBooking(bookingId) {
   return request('DELETE', `/bookings/${bookingId}`, { auth: true });
 }
-
-// NOT BUILT ON THE BACKEND YET — needs Lambda. Screens stub this one.
-// export function generateTicket(bookingId) { ... }
+export function generateTicket(bookingId) {
+  return request('POST', `/bookings/${bookingId}/ticket`, { auth: true });
+}
